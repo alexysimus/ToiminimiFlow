@@ -49,6 +49,26 @@ export const formatFinnishDate = (dateStr: string | Date | undefined): string =>
   return `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`;
 };
 
+export const formatFinnishTime = (dateStr: string | Date | undefined, includeSeconds: boolean = false): string => {
+  if (!dateStr) return '';
+  const d = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
+  if (isNaN(d.getTime())) return '';
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  if (includeSeconds) {
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    return `klo\u00A0${hours}.${minutes}.${seconds}`;
+  }
+  return `klo\u00A0${hours}.${minutes}`;
+};
+
+export const formatFinnishDateTime = (dateStr: string | Date | undefined): string => {
+  if (!dateStr) return '';
+  const d = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
+  if (isNaN(d.getTime())) return '';
+  return `${formatFinnishDate(d)}\u00A0${formatFinnishTime(d)}`;
+};
+
 export const formatFinnishDateRange = (startStr: string, endStr: string): string => {
   return `${formatFinnishDate(startStr)}\u00A0–\u00A0${formatFinnishDate(endStr)}`;
 };

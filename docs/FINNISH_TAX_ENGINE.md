@@ -109,3 +109,19 @@ $$\text{Total Tax Safe Reserve} = \max(0, \text{VAT Payable}) + \text{Estimated 
 $$\mathbf{Safe\ to\ Withdraw} = \max(0, \text{Gross Bank Cash} - \text{Direct Expenses} - \text{Total Tax Safe Reserve})$$
 
 This single metric guarantees sole traders know exactly how much money can be transferred to personal accounts as private withdrawals (*yksityisotot*).
+
+---
+
+## 6. Finnish Localization & Vero Terminology Guidelines
+
+### A. Number, Currency & Temporal Standards (SFS 4175)
+To comply with the Finnish national standard **SFS 4175** and Finnish Tax Administration filing rules:
+1. **Numbers**: Space as thousands separator, comma as decimal (`18 255,00`).
+2. **Currency**: Trailing symbol separated by non-breaking space (`18 255,00\u00A0€`).
+3. **Dates**: Day-month-year separated by dots with no leading zeroes (`23.10.2026`).
+4. **Times**: 24-hour clock separated by a period (`klo 18.45` or `18.45`).
+5. **MyTax Clipboard Compatibility**: When copying calculated numbers to clipboard for OmaVero (Form 5 Lines 300, 350, 374, 378, 380), the clipboard string must format decimals with a comma `,` (e.g. `2450,00`), ensuring OmaVero form inputs accept the pasted figure without syntax rejection.
+
+### B. The English + Vero Finnish Hybrid Convention
+All user interface copy uses English for global accessibility, while retaining exact Finnish legal and tax terms in parentheses or badges. This ensures users can correlate any value directly to their official OmaVero submission documents. See [`docs/DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) for the complete terminology alignment table.
+

@@ -1,3 +1,12 @@
+/* Typography: Primary Commissioner with JetBrains Mono for Tabular Numerals */
+html, body, button, input, select, textarea {
+  font-family: 'Commissioner', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
 /* iOS System Fonts & Safe-Area Ergonomics */
 @layer utilities {
   .pb-safe {

@@ -108,3 +108,59 @@ Financial applications become crowded very quickly. To prevent visual fatigue:
 
 ### 3. Modal Workspaces for Multi-Step Tasks
 - Complex calculations (e.g., Recording POS card batch settlements, consulting the beginner's tax guide, or filing Form 5) are isolated in dedicated `BottomSheet` / modal workspaces, keeping the primary viewport clean.
+
+---
+
+## 6. Finnish Localization Standards (SFS 4175 Standard)
+
+All numerical, temporal, and financial values must adhere to the Finnish national standard **SFS 4175** (`services/formatUtils.ts`):
+
+| Format Type | Finnish SFS 4175 Standard | Incorrect / Non-Compliant | Utility Function |
+| :--- | :--- | :--- | :--- |
+| **Currency** | `18 255,00 €` (non-breaking space thousands, comma decimal, trailing €) | `€18,255.00` or `18.255,00 €` | `formatFinnishCurrency(num)` |
+| **Decimals** | `25,5 %`, `0,55 €/km` (comma decimal separator) | `25.5%`, `0.55` | `formatFinnishPercent(num)` |
+| **Dates** | `d.m.yyyy` (`23.10.2026`, `2.2.2026` no leading zero on day/month) | `2026-10-23`, `10/23/2026` | `formatFinnishDate(date)` |
+| **Date Ranges** | `2.10.2026 – 15.1.2027` (en-dash with spaces) | `2.10.2026-15.1.2027` | `formatFinnishDateRange(s, e)` |
+| **Time** | `klo 18.45` or `18.45` (24-hour clock, period separator) | `6:45 PM`, `18:45` | `formatFinnishTime(date)` |
+| **IBAN** | `FI21 1234 5600 0007 89` (4-character space-separated blocks) | `FI2112345600000789` | `formatFinnishIban(iban)` |
+| **Viitenumero** | `12345 67890` (5-digit groups right-to-left, Modulo 10 7-3-1) | `1234567890` | `formatFinnishReference(ref)` |
+
+---
+
+## 7. Bilingual Hybrid Terminology Pattern & Vero Guidelines
+
+### Design Rationale: Why English UI + Official Finnish Terms?
+1. **Accessibility for Immigrant Entrepreneurs**: Over 30% of new toiminimi businesses in the Helsinki capital region and tech hubs are founded by non-native Finnish speakers. English UI makes the application accessible to developers, designers, Wolt couriers, and international consultants.
+2. **Statutory Alignment with OmaVero**: Sole traders must report their taxes in Finnish inside the official **MyTax (OmaVero)** portal. If the app only used English translations, users would be lost when trying to locate the matching box in OmaVero.
+3. **The Solution**: All essential financial and regulatory concepts use the **Bilingual Hybrid Pattern**: the English conceptual term is paired immediately with the official Finnish statutory term in parentheses, sub-labels, or badges.
+
+### Official Verohallinto Terminology Alignment Table
+
+| Application UI Term (English) | Official Finnish Statutory Term (Verohallinto) | Context / OmaVero Field |
+| :--- | :--- | :--- |
+| **Business Tax Return Form 5** | *Elinkeinotoiminnan veroilmoitus (Lomake 5)* | Annual statutory business return |
+| **Prepayment Tax** | *Ennakkovero* | Advance income tax installments |
+| **Additional Prepayment** | *Lisäennakko* | Voluntary top-up before Jan 15 to avoid interest |
+| **Back Tax / Residual Tax** | *Jäännösvero (Mätkyt)* | Unpaid tax assessed after final tax decision |
+| **Entrepreneur Relief** | *Yrittäjävähennys* | Statutory 5% tax-free deduction on profit (Line 380) |
+| **Net Turnover** | *Liikevaihto (ALV 0 %)* | Sales excluding VAT (Line 300) |
+| **Grants & Subsidies** | *Saadut tuet ja avustukset* | Starttiraha / TE-toimisto subsidies (Line 340) |
+| **Materials & Supplies** | *Aineet ja tarvikkeet* | Raw materials and physical supplies (Line 350) |
+| **Operating Expenses** | *Muut vähennyskelpoiset kulut* | Software, marketing, insurance, fees (Line 374) |
+| **Additional Deductions** | *Lisävähennykset* | Mileage log + Home office claims (Line 378) |
+| **Driver's Log (Mileage)** | *Ajopäiväkirja (Matkakulut)* | Personal car business trips (€0.55/km 2026) |
+| **Home Office Deduction** | *Työhuonevähennys* | Standard workspace tiers (€980 / €490 / €245) |
+| **Pension Insurance** | *YEL-vakuutus (Yrittäjän eläkevakuutus)* | Statutory self-employed pension |
+| **Value Added Tax (VAT)** | *Arvonlisävero (ALV)* | Indirect consumption tax |
+| **Standard VAT Rate** | *Yleinen arvonlisäverokanta (25,5 %)* | Goods and services since 1.9.2024 |
+| **Single-Entry Bookkeeping** | *Yhdenkertainen kirjanpito* | Cash-basis accounting permitted for toiminimi |
+| **Cash-Basis Accounting** | *Maksuperusteinen kirjanpito* | Income/expenses booked on transaction date |
+| **Safe to Withdraw** | *Turvallinen nostovara* | Real net profit minus tax reserves |
+| **Private Withdrawal** | *Yksityisotto* | Transfer from business bank to personal account |
+| **Business ID** | *Y-tunnus* | Finnish business registration number |
+| **Reference Number** | *Viitenumero* | Finnish national bank invoice reference |
+| **Due Date** | *Eräpäivä* | Last payment date of an invoice |
+| **Payment Terms** | *Maksuehto* | Payment window in days (e.g. 14 pv) |
+| **Payment Slip** | *Tilisiirtolomake* | Standard invoice bottom payment slip |
+| **MyTax Portal** | *OmaVero* | Official Vero.fi electronic portal |
+

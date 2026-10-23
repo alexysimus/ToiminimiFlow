@@ -7,11 +7,23 @@
     <title>Toiminimi Flow - Finnish Tax & Accounting</title>
     <meta name="description" content="Comprehensive Finnish toiminimi single-entry accounting suite and OP Kevytyrittäjä replacement, featuring 2026 Vero statutory rules, VAT tracking, Form 5 helper, and mileage log." />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Commissioner', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-      body {
+      html, body {
         font-family: 'Commissioner', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background-color: #F8FAFC;
       }
