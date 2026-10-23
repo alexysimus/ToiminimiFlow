@@ -23,6 +23,9 @@ dist-ssr
 .gemini
 .system_generated
 .brain
+.agents/
+.agent/
+seoo-skill-pack/
 
 # Editor directories and files
 .vscode/*
