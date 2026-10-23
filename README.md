@@ -11,7 +11,7 @@
 
 **A 100% free, open-source single-entry bookkeeping (*maksuperusteinen yhdenkertainen kirjanpito*) and invoicing suite built specifically for Finnish sole traders (*toiminimiyrittäjät / yksityiset elinkeinonharjoittajat*).**
 
-[Features](#-key-features) • [Two-Tier Privacy Architecture](#-two-tier-privacy-architecture) • [Finnish Tax Compliance](#-2026-finnish-tax-compliance-engine) • [Quick Start](#-quick-start) • [Deployment](#-deployment) • [Contributing](#-open-source--contributing)
+[Features](#-key-features) • [Two-Tier Privacy](#-two-tier-privacy-architecture) • [Architecture Guide](docs/ARCHITECTURE.md) • [Design System (Apple HIG)](docs/DESIGN_SYSTEM.md) • [2026 Tax Engine](docs/FINNISH_TAX_ENGINE.md) • [Security Policy](docs/SECURITY.md) • [Contributing](CONTRIBUTING.md)
 
 </div>
 
