@@ -103,37 +103,37 @@ export const DeductionsView: React.FC = () => {
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <div className="p-4 sm:p-5 bg-white border border-slate-200/80 rounded-2xl shadow-xs space-y-1 min-w-0">
-          <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block truncate">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block truncate">
             Total Additional Deductions (Box 378)
           </span>
-          <div className="text-xl sm:text-2xl font-bold font-mono tabular-nums text-[#003580] tracking-tight truncate">
+          <div className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-[#003580] tracking-tight truncate">
             {formatFinnishCurrency(grandTotalDeductions)}
           </div>
-          <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
+          <p className="text-xs text-slate-500 truncate">
             Deducted from taxable profit
           </p>
         </div>
 
         <div className="p-4 sm:p-5 bg-white border border-slate-200/80 rounded-2xl shadow-xs space-y-1 min-w-0">
-          <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block truncate">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block truncate">
             Mileage Allowance ({totalKm} km)
           </span>
-          <div className="text-xl sm:text-2xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
+          <div className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
             {formatFinnishCurrency(totalDeduction)}
           </div>
-          <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
+          <p className="text-xs text-slate-500 truncate">
             €0.55/km (Vero 2026 statutory rate)
           </p>
         </div>
 
         <div className="p-4 sm:p-5 bg-white border border-slate-200/80 rounded-2xl shadow-xs space-y-1 min-w-0">
-          <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block truncate">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block truncate">
             Home Office Deduction
           </span>
-          <div className="text-xl sm:text-2xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
+          <div className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
             {formatFinnishCurrency(homeOfficeAmount)}
           </div>
-          <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
+          <p className="text-xs text-slate-500 truncate">
             {homeOffice.method === 'tier_1' ? 'Full-Time (€980)' : homeOffice.method === 'tier_2' ? 'Part-Time (€490)' : 'Occasional (€245)'}
           </p>
         </div>
@@ -189,55 +189,55 @@ export const DeductionsView: React.FC = () => {
 
             <form onSubmit={handleAddTrip} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
               <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Date</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Date</label>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[40px]"
+                  className="w-full text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Route (From – To)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Route (From – To)</label>
                 <input
                   type="text"
                   placeholder="e.g. Helsinki – Tampere – Helsinki"
                   value={route}
                   onChange={(e) => setRoute(e.target.value)}
-                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[40px]"
+                  className="w-full text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Distance (km)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Distance (km)</label>
                 <input
                   type="text"
                   placeholder="e.g. 42"
                   value={kilometers}
                   onChange={(e) => setKilometers(e.target.value)}
-                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[40px]"
+                  className="w-full text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Business Purpose / Client</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Business Purpose / Client</label>
                 <input
                   type="text"
                   placeholder="e.g. Client consultation meeting"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
-                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[40px]"
+                  className="w-full text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
                 />
               </div>
 
               <div className="flex items-end sm:col-span-2 md:col-span-1">
                 <button
                   type="submit"
-                  className="w-full py-2 bg-[#003580] hover:bg-[#002868] text-white text-xs font-semibold rounded-xl shadow-xs transition flex items-center justify-center space-x-1 min-h-[40px]"
+                  className="w-full py-2 px-3 bg-[#003580] hover:bg-[#002868] text-white text-xs font-semibold rounded-xl shadow-xs transition flex items-center justify-center space-x-1.5 min-h-[44px]"
                 >
                   <Plus size={16} />
                   <span>Add Trip</span>
@@ -315,26 +315,26 @@ export const DeductionsView: React.FC = () => {
                   {mileageEntries.map(trip => {
                     const tripDeduction = trip.kilometers * ((trip.ratePerKm || VERO_CONSTANTS.MILEAGE_RATE_2026) + (trip.passengers || 0) * VERO_CONSTANTS.PASSENGER_RATE_2026);
                     return (
-                      <div key={trip.id} className="py-3 space-y-1.5">
+                      <div key={trip.id} className="py-3.5 space-y-2">
                         <div className="flex items-center justify-between min-w-0">
-                          <span className="font-semibold text-xs text-slate-900 truncate pr-2">
+                          <span className="font-semibold text-sm text-slate-900 truncate pr-2">
                             {trip.route}
                           </span>
-                          <span className="font-mono font-bold text-xs text-[#003580] tabular-nums whitespace-nowrap">
+                          <span className="font-mono font-bold text-sm sm:text-base text-[#003580] tabular-nums whitespace-nowrap">
                             {formatFinnishCurrency(tripDeduction)}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between text-[11px] text-slate-500">
+                        <div className="flex items-center justify-between text-xs text-slate-500">
                           <span className="truncate max-w-[200px]">{trip.purpose}</span>
-                          <span className="font-mono">{formatFinnishNumber(trip.kilometers, 1, 1)} km</span>
+                          <span className="font-mono font-medium text-slate-700">{formatFinnishNumber(trip.kilometers, 1, 1)} km</span>
                         </div>
-                        <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
+                        <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
                           <span className="font-mono">{formatFinnishDate(trip.date)}</span>
                           <button
                             onClick={() => handleDeleteTrip(trip.id)}
-                            className="p-1 text-rose-500 hover:text-rose-700 min-h-[32px] min-w-[32px] flex items-center justify-end"
+                            className="p-2 text-rose-500 hover:text-rose-700 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-end rounded-lg"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </div>

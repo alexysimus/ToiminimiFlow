@@ -54,3 +54,20 @@ html, body {
   overflow-wrap: anywhere;
   word-break: normal;
 }
+
+/* Dynamic Viewport Unit Helpers */
+.h-dvh {
+  height: 100dvh;
+}
+.min-h-dvh {
+  min-height: 100dvh;
+}
+
+/* Hide scrollbar for clean carousels while keeping scrollability */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

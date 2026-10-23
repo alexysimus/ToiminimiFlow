@@ -94,6 +94,14 @@ Toiminimi Flow is designed with a strict **privacy-first, zero-knowledge** philo
 - **Tax Calendar Sync (.ics)**:
   - Computes statutory deadlines for VAT, Form 5, prepayment tax (*ennakkovero*), and additional prepayment (*lisäennakko*).
   - Export standard RFC 5545 `.ics` iCalendar files with built-in alarms (7 days and 2 days before) for Google Calendar, Apple Calendar, and Outlook.
+- **Apple HIG & Cross-OS Ergonomics**:
+  - Touch-friendly 44×44px minimum targets, spring drag gestures, and pull-to-refresh with subtle haptic vibration.
+  - Mobile CSS scroll-snap horizontal carousel with active dot indicators for top cashflow & tax metrics.
+  - Responsive table-to-card reflow preventing horizontal overflow on phones and tablets.
+  - Input auto-zoom prevention (16px touch scale) on iOS Safari.
+- **Progressive Web App (PWA) Offline Architecture**:
+  - Installable on iOS (Safari Home Screen), Android (Chrome), Windows, and macOS.
+  - Service worker caching (`public/sw.js`) guarantees 100% offline functionality without internet connectivity.
 - **Data Backup & Audit Trail**:
   - Export and restore complete JSON backups.
   - Append-only audit trail logging all invoice and expense creations, updates, and deletions.

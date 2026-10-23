@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#003580"/>
+      <stop offset="100%" stop-color="#001D4A"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  
+  <!-- Apple HIG Squircle Background -->
+  <rect width="512" height="512" rx="115" fill="url(#bg)"/>
+  
+  <!-- Subtle Inner Border -->
+  <rect x="2" y="2" width="508" height="508" rx="113" fill="none" stroke="#FFFFFF" stroke-opacity="0.15" stroke-width="4"/>
+  
+  <!-- Stylized Finnish Flag & Dynamic Flow Ribbon -->
+  <g filter="url(#shadow)">
+    <!-- White Field Underlay -->
+    <rect x="96" y="96" width="320" height="320" rx="40" fill="#FFFFFF"/>
+    
+    <!-- Vertical Blue Cross Bar -->
+    <rect x="196" y="96" width="60" height="320" fill="#003580"/>
+    
+    <!-- Horizontal Blue Cross Bar -->
+    <rect x="96" y="226" width="320" height="60" fill="#003580"/>
+    
+    <!-- Flow Euro Badge Center Accent -->
+    <circle cx="226" cy="256" r="48" fill="#001D4A" stroke="#FFFFFF" stroke-width="6"/>
+    <text x="226" y="272" font-family="-apple-system, BlinkMacSystemFont, 'Commissioner', sans-serif" font-size="44" font-weight="bold" fill="#FFFFFF" text-anchor="middle">€</text>
+  </g>
+</svg>

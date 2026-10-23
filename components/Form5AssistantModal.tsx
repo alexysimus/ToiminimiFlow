@@ -124,18 +124,18 @@ export const Form5AssistantModal: React.FC<Form5AssistantModalProps> = ({
               <div className="p-4 bg-slate-50/80 border border-slate-200/80 rounded-2xl space-y-3 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] font-bold text-[#003580] bg-blue-50 px-2 py-0.5 rounded">
+                    <span className="font-mono text-xs font-bold text-[#003580] bg-blue-100/70 px-2.5 py-1 rounded-lg">
                       Box 300 / 3000
                     </span>
-                    <span className="text-[11px] text-slate-500">VAT 0%</span>
+                    <span className="text-xs text-slate-500 font-medium">VAT 0%</span>
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900 mt-1.5">Net Turnover (Liikevaihto)</h4>
-                  <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
+                  <h4 className="font-bold text-base text-slate-900 mt-1.5">Net Turnover (Liikevaihto)</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed mt-0.5">
                     Total sales from invoices and card terminal / platform settlements excluding VAT.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-200/70">
-                  <span className="text-lg font-bold font-mono text-slate-900 tabular-nums">
+                  <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 tabular-nums">
                     {formatFinnishCurrency(form5.turnoverNet)}
                   </span>
                   <button
@@ -161,18 +161,18 @@ export const Form5AssistantModal: React.FC<Form5AssistantModalProps> = ({
               <div className="p-4 bg-slate-50/80 border border-slate-200/80 rounded-2xl space-y-3 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] font-bold text-[#003580] bg-blue-50 px-2 py-0.5 rounded">
+                    <span className="font-mono text-xs font-bold text-[#003580] bg-blue-100/70 px-2.5 py-1 rounded-lg">
                       Box 340 / 3400
                     </span>
-                    <span className="text-[11px] text-slate-500">VAT 0%</span>
+                    <span className="text-xs text-slate-500 font-medium">VAT 0%</span>
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900 mt-1.5">Subsidies and Grants (Saadut tuet)</h4>
-                  <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
+                  <h4 className="font-bold text-base text-slate-900 mt-1.5">Subsidies and Grants (Saadut tuet)</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed mt-0.5">
                     Start-up grant (Starttiraha) or development subsidies. Taxable business income, not subject to VAT.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-200/70">
-                  <span className="text-lg font-bold font-mono text-slate-900 tabular-nums">
+                  <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 tabular-nums">
                     {formatFinnishCurrency(form5.grantsAndSubsidies)}
                   </span>
                   <button
@@ -202,7 +202,7 @@ export const Form5AssistantModal: React.FC<Form5AssistantModalProps> = ({
               <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                 2. Deductible Business Expenses (Kulut)
               </h3>
-              <span className="text-[11px] text-slate-500 font-medium">MyTax Expenses Stage</span>
+              <span className="text-xs text-slate-500 font-medium">MyTax Expenses Stage</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -210,18 +210,18 @@ export const Form5AssistantModal: React.FC<Form5AssistantModalProps> = ({
               <div className="p-4 bg-slate-50/80 border border-slate-200/80 rounded-2xl space-y-3 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] font-bold text-[#003580] bg-blue-50 px-2 py-0.5 rounded">
+                    <span className="font-mono text-xs font-bold text-[#003580] bg-blue-100/70 px-2.5 py-1 rounded-lg">
                       Box 350 / 3500
                     </span>
-                    <span className="text-[11px] text-slate-500">Net purchases</span>
+                    <span className="text-xs text-slate-500 font-medium">Net purchases</span>
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900 mt-1.5">Materials, Supplies & Goods (Aineet)</h4>
-                  <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
+                  <h4 className="font-bold text-base text-slate-900 mt-1.5">Materials, Supplies & Goods (Aineet)</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed mt-0.5">
                     Raw materials, goods purchased for resale, or direct production supplies (excluding VAT).
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-200/70">
-                  <span className="text-lg font-bold font-mono text-slate-900 tabular-nums">
+                  <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 tabular-nums">
                     {formatFinnishCurrency(form5.materialsSupplies)}
                   </span>
                   <button
@@ -247,18 +247,18 @@ export const Form5AssistantModal: React.FC<Form5AssistantModalProps> = ({
               <div className="p-4 bg-slate-50/80 border border-slate-200/80 rounded-2xl space-y-3 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] font-bold text-[#003580] bg-blue-50 px-2 py-0.5 rounded">
+                    <span className="font-mono text-xs font-bold text-[#003580] bg-blue-100/70 px-2.5 py-1 rounded-lg">
                       Box 374 / 3740
                     </span>
-                    <span className="text-[11px] text-slate-500">Net expenses</span>
+                    <span className="text-xs text-slate-500 font-medium">Net expenses</span>
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900 mt-1.5">Other Operating Expenses (Muut kulut)</h4>
-                  <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
+                  <h4 className="font-bold text-base text-slate-900 mt-1.5">Other Operating Expenses (Muut kulut)</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed mt-0.5">
                     Software, IT tools, telephone, internet, marketing, insurance, accounting, and Stripe/payment gateway fees.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-200/70">
-                  <span className="text-lg font-bold font-mono text-slate-900 tabular-nums">
+                  <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 tabular-nums">
                     {formatFinnishCurrency(form5.operatingExpenses)}
                   </span>
                   <button
@@ -288,24 +288,24 @@ export const Form5AssistantModal: React.FC<Form5AssistantModalProps> = ({
               <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                 3. Additional Deductions (Lisävähennykset)
               </h3>
-              <span className="text-[11px] text-slate-500 font-medium">MyTax Deductions Stage</span>
+              <span className="text-xs text-slate-500 font-medium">MyTax Deductions Stage</span>
             </div>
 
             <div className="p-4 bg-slate-50/80 border border-slate-200/80 rounded-2xl space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <div className="flex items-center space-x-2">
-                    <span className="font-mono text-[11px] font-bold text-[#003580] bg-blue-50 px-2 py-0.5 rounded">
+                    <span className="font-mono text-xs font-bold text-[#003580] bg-blue-100/70 px-2.5 py-1 rounded-lg">
                       Box 378
                     </span>
-                    <span className="font-bold text-sm text-slate-900">Total Additional Deductions (Lisävähennykset)</span>
+                    <span className="font-bold text-base text-slate-900">Total Additional Deductions (Lisävähennykset)</span>
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     Combined driver's log kilometre allowance and home office workspace deduction.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 sm:pt-0">
-                  <span className="text-lg font-bold font-mono text-slate-900 tabular-nums">
+                  <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 tabular-nums">
                     {formatFinnishCurrency(form5.totalLisavahennykset)}
                   </span>
                   <button
@@ -332,9 +332,9 @@ export const Form5AssistantModal: React.FC<Form5AssistantModalProps> = ({
                 <div className="bg-white p-3 rounded-xl border border-slate-200/60 flex justify-between items-center">
                   <div>
                     <span className="font-semibold text-slate-800 block text-xs">Driver's Log Allowance</span>
-                    <span className="text-[10px] text-slate-500">€0.55/km (2026 statutory rate)</span>
+                    <span className="text-xs text-slate-500">€0.55/km (2026 statutory rate)</span>
                   </div>
-                  <span className="font-mono font-bold text-slate-900 tabular-nums text-xs">
+                  <span className="font-mono font-bold text-slate-900 tabular-nums text-xs sm:text-sm">
                     {formatFinnishCurrency(form5.mileageDeduction)}
                   </span>
                 </div>
@@ -342,9 +342,9 @@ export const Form5AssistantModal: React.FC<Form5AssistantModalProps> = ({
                 <div className="bg-white p-3 rounded-xl border border-slate-200/60 flex justify-between items-center">
                   <div>
                     <span className="font-semibold text-slate-800 block text-xs">Home Office Deduction</span>
-                    <span className="text-[10px] text-slate-500">Standard formula or actual expenses</span>
+                    <span className="text-xs text-slate-500">Standard formula or actual expenses</span>
                   </div>
-                  <span className="font-mono font-bold text-slate-900 tabular-nums text-xs">
+                  <span className="font-mono font-bold text-slate-900 tabular-nums text-xs sm:text-sm">
                     {formatFinnishCurrency(form5.homeOfficeDeduction)}
                   </span>
                 </div>

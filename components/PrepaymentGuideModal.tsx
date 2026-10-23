@@ -57,11 +57,11 @@ export const PrepaymentGuideModal: React.FC<PrepaymentGuideModalProps> = ({
             {/* Step 1 */}
             <div className="p-4 border border-slate-200/90 rounded-2xl bg-white shadow-2xs space-y-2 hover:border-[#BFDBFE] transition">
               <div className="flex items-center space-x-2 text-[#003580] font-bold text-xs uppercase tracking-wider">
-                <span className="w-5 h-5 rounded-full bg-[#003580] text-white flex items-center justify-center text-[10px] font-mono">1</span>
+                <span className="w-5 h-5 rounded-full bg-[#003580] text-white flex items-center justify-center text-xs font-mono">1</span>
                 <span>Prepayment Tax Decision</span>
               </div>
-              <h4 className="font-bold text-slate-900 text-xs sm:text-sm">Estimate in MyTax</h4>
-              <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+              <h4 className="font-bold text-slate-900 text-sm">Estimate in MyTax</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Log in to <strong>MyTax (OmaVero)</strong>. Choose <em>Tax matters &gt; Request or adjust prepayment tax</em>. Estimate your expected annual net profit (e.g. €20,000).
               </p>
             </div>
@@ -69,11 +69,11 @@ export const PrepaymentGuideModal: React.FC<PrepaymentGuideModalProps> = ({
             {/* Step 2 */}
             <div className="p-4 border border-slate-200/90 rounded-2xl bg-white shadow-2xs space-y-2 hover:border-[#BFDBFE] transition">
               <div className="flex items-center space-x-2 text-[#003580] font-bold text-xs uppercase tracking-wider">
-                <span className="w-5 h-5 rounded-full bg-[#003580] text-white flex items-center justify-center text-[10px] font-mono">2</span>
+                <span className="w-5 h-5 rounded-full bg-[#003580] text-white flex items-center justify-center text-xs font-mono">2</span>
                 <span>Tax Safe Bank Reserve</span>
               </div>
-              <h4 className="font-bold text-slate-900 text-xs sm:text-sm">Reserve Tax in Account</h4>
-              <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+              <h4 className="font-bold text-slate-900 text-sm">Reserve Tax in Account</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
                 The <strong>Tax Safe Reserve</strong> in this app calculates the exact cash buffer (VAT + income tax) that you should keep in your business account for upcoming deadlines.
               </p>
             </div>
@@ -81,11 +81,11 @@ export const PrepaymentGuideModal: React.FC<PrepaymentGuideModalProps> = ({
             {/* Step 3 */}
             <div className="p-4 border border-slate-200/90 rounded-2xl bg-white shadow-2xs space-y-2 hover:border-[#BFDBFE] transition">
               <div className="flex items-center space-x-2 text-[#003580] font-bold text-xs uppercase tracking-wider">
-                <span className="w-5 h-5 rounded-full bg-[#003580] text-white flex items-center justify-center text-[10px] font-mono">3</span>
+                <span className="w-5 h-5 rounded-full bg-[#003580] text-white flex items-center justify-center text-xs font-mono">3</span>
                 <span>Pay Installments on Time</span>
               </div>
-              <h4 className="font-bold text-slate-900 text-xs sm:text-sm">Quarterly Installments</h4>
-              <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+              <h4 className="font-bold text-slate-900 text-sm">Quarterly Installments</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Vero generates payment slips in MyTax. Prepayment tax typically falls due 2 to 4 times a year (February, May, August, November).
               </p>
             </div>
@@ -93,11 +93,11 @@ export const PrepaymentGuideModal: React.FC<PrepaymentGuideModalProps> = ({
             {/* Step 4 */}
             <div className="p-4 border border-slate-200/90 rounded-2xl bg-white shadow-2xs space-y-2 hover:border-[#BFDBFE] transition">
               <div className="flex items-center space-x-2 text-[#003580] font-bold text-xs uppercase tracking-wider">
-                <span className="w-5 h-5 rounded-full bg-[#003580] text-white flex items-center justify-center text-[10px] font-mono">4</span>
+                <span className="w-5 h-5 rounded-full bg-[#003580] text-white flex items-center justify-center text-xs font-mono">4</span>
                 <span>Review Profit</span>
               </div>
-              <h4 className="font-bold text-slate-900 text-xs sm:text-sm">Adjust when Revenue Changes</h4>
-              <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+              <h4 className="font-bold text-slate-900 text-sm">Adjust when Revenue Changes</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
                 If your business revenue rises or drops noticeably, adjust your estimate in MyTax to avoid back taxes (jäännösvero / mätkyt) or overpaying.
               </p>
             </div>
@@ -106,11 +106,11 @@ export const PrepaymentGuideModal: React.FC<PrepaymentGuideModalProps> = ({
 
         {/* Money Withdrawal / Yksityisotto */}
         <div className="p-4 sm:p-5 border border-emerald-200/80 rounded-2xl bg-emerald-50/40 space-y-2">
-          <h4 className="font-bold text-slate-900 text-xs sm:text-sm flex items-center gap-2">
-            <CheckCircle className="text-emerald-600 shrink-0" size={16} />
+          <h4 className="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+            <CheckCircle className="text-emerald-600 shrink-0" size={18} />
             <span>How do I take money out for personal use? (Owner's Drawings / Yksityisotto)</span>
           </h4>
-          <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             As a sole trader, you do not pay yourself a traditional employee payslip or salary. The portion displayed in green as <strong>"Safe to Withdraw (Owner's Draw)"</strong> is money you can transfer from your business bank account to your personal account at any time without filing a separate tax report.
           </p>
         </div>
@@ -121,10 +121,10 @@ export const PrepaymentGuideModal: React.FC<PrepaymentGuideModalProps> = ({
             href={VERO_LINKS.PREPAYMENT_TAX} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center space-x-1.5 text-[#003580] hover:text-[#002868] font-semibold text-xs min-h-[40px] px-1"
+            className="inline-flex items-center space-x-1.5 text-[#003580] hover:text-[#002868] font-semibold text-xs sm:text-sm min-h-[44px] px-1"
           >
             <span>Tax Administration Prepayment Tax Guide</span>
-            <ExternalLink size={14} />
+            <ExternalLink size={15} />
           </a>
 
           <a 

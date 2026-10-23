@@ -127,3 +127,29 @@ Under Chapter 7 of the Finnish Accounting Act (*Kirjanpitolaki*) and the Busines
 - **Income Recognition**: Recorded when funds hit your bank account or payment terminal settlement.
 - **Expense Recognition**: Recorded when payment is transacted from business card or bank account.
 - **Receipt Archival**: All vouchers and receipts must be preserved for **6 years** from the end of the financial year.
+
+---
+
+## 5. Progressive Web App (PWA) & Offline Runtime Architecture
+
+```mermaid
+flowchart TD
+    Browser["Client Browser / WebView"]
+    SW["Service Worker (public/sw.js)"]
+    CacheStorage["Browser Cache Storage ('flow-toiminimi-v1')"]
+    Net["Network / CDN"]
+    LocalStorage["On-Device LocalStorage (Encrypted JSON Ledger)"]
+
+    Browser -->|Resource Request| SW
+    SW -->|App Shell / Static Assets| CacheStorage
+    CacheStorage -.->|Fallback to Network| Net
+    Browser <-->|CRUD Operations| LocalStorage
+```
+
+### Key Technical Aspects
+1. **Zero-Network Availability**: The service worker intercepts requests for the HTML app shell, Commissioner font stylesheets, and application scripts, serving them immediately from cache.
+2. **Data Resiliency**: All business ledger data is stored in synchronous on-device `localStorage` (`flow_invoices`, `flow_expenses`, `flow_settings`, etc.). An internet outage or dead-zone in Lapland never impedes invoice drafting, mileage logging, or tax reserve calculations.
+3. **Cross-OS Installability**:
+   - iOS: "Add to Home Screen" operates with full standalone status bar treatment, safe-area insets (`env(safe-area-inset-top)` / `bottom`), and disabled elastic bounce on root containers.
+   - Android & Desktop (Chrome/Edge): Native install prompt support, custom launcher squircle icons (`public/icons/icon.svg`), and background sync readiness.
+

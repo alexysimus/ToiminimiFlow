@@ -178,16 +178,16 @@ const ExpenseForm: React.FC = () => {
                     value={expense.receiptUrl || ''}
                     onChange={(e) => setExpense({ ...expense, receiptUrl: e.target.value })}
                     placeholder="https://drive.google.com/... or /path/to/receipt.pdf"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs pl-8 pr-3 py-2.5 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base sm:text-xs pl-8 pr-3 py-2.5 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center space-x-1.5 shrink-0 transition min-h-[42px]"
+                  className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold flex items-center space-x-1.5 shrink-0 transition min-h-[44px]"
                   title="Upload receipt image or PDF from device"
                 >
-                  <Upload size={14} />
+                  <Upload size={16} />
                   <span className="hidden sm:inline">Upload</span>
                 </button>
               </div>
@@ -228,7 +228,7 @@ const ExpenseForm: React.FC = () => {
               </div>
             )}
 
-            <p className="text-[10px] text-slate-500 leading-relaxed">
+            <p className="text-xs text-slate-500 leading-relaxed">
               💡 <strong>Storage Tip:</strong> Pasting a link to Google Drive, iCloud, or a local file path keeps your browser storage lightweight and permanent with zero quota limits.
             </p>
           </div>
@@ -243,17 +243,17 @@ const ExpenseForm: React.FC = () => {
                 type="date" 
                 value={expense.paymentDate} 
                 onChange={(e) => setExpense({...expense, paymentDate: e.target.value})} 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs px-3.5 py-2.5 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base sm:text-sm px-3.5 py-2.5 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
                 required
               />
             </div>
 
             <div className="p-3 bg-[#EDF4FC] rounded-xl border border-[#BFDBFE] space-y-1 text-xs">
-              <h4 className="font-bold text-[#003580] flex items-center gap-1.5 text-[11px]">
+              <h4 className="font-bold text-[#003580] flex items-center gap-1.5 text-xs">
                 <Sparkles size={14} />
                 <span>Accounting Act & Tax Rule</span>
               </h4>
-              <p className="text-slate-600 leading-relaxed text-[11px]">
+              <p className="text-slate-600 leading-relaxed text-xs">
                 Under single-entry cash-basis bookkeeping, an expense is recorded on the date funds leave your bank account or card. Keep all receipts for 6 years.
               </p>
             </div>
@@ -266,7 +266,7 @@ const ExpenseForm: React.FC = () => {
             <h3 className="text-xs font-bold text-[#003580] uppercase tracking-wider">
               Expense Items (Business Deductions)
             </h3>
-            <span className="text-xs font-mono font-bold text-slate-900 tabular-nums">
+            <span className="text-xs sm:text-sm font-mono font-bold text-slate-900 tabular-nums">
               Total: {formatFinnishCurrency(totalExpense)}
             </span>
           </div>
@@ -277,24 +277,24 @@ const ExpenseForm: React.FC = () => {
                 key={item.id} 
                 className="bg-slate-50/70 p-3.5 sm:p-4 rounded-xl border border-slate-200 space-y-3"
               >
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
                   <div className="sm:col-span-5">
-                    <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">Description / Item</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Description / Item *</label>
                     <input 
                       placeholder="e.g. Adobe Creative Cloud or Office supplies" 
                       value={item.description} 
                       onChange={(e) => updateItem(index, 'description', e.target.value)} 
-                      className="w-full bg-white border border-slate-200 rounded-lg text-xs text-slate-900 px-3 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[38px]" 
+                      className="w-full bg-white border border-slate-200 rounded-xl text-base sm:text-sm text-slate-900 px-3 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
                       required
                     />
                   </div>
 
                   <div className="sm:col-span-3">
-                    <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">Tax Category (Form 5)</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Tax Category (Form 5)</label>
                     <select 
                       value={item.category} 
                       onChange={(e) => updateItem(index, 'category', e.target.value as ExpenseCategory)} 
-                      className="w-full bg-white border border-slate-200 rounded-lg text-xs text-slate-900 px-2 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[38px] truncate"
+                      className="w-full bg-white border border-slate-200 rounded-xl text-base sm:text-sm text-slate-900 px-2 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px] truncate"
                     >
                       {Object.values(ExpenseCategory).map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -302,29 +302,29 @@ const ExpenseForm: React.FC = () => {
                     </select>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:contents gap-2">
-                    <div className="sm:col-span-2">
-                      <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">VAT Rate</label>
+                  <div className="grid grid-cols-2 sm:col-span-4 gap-2">
+                    <div>
+                      <label className="text-xs font-semibold text-slate-700 block mb-1">VAT Rate</label>
                       <select 
                         value={item.vatRate !== undefined ? item.vatRate : 25.5} 
                         onChange={(e) => updateItem(index, 'vatRate', parseFloat(e.target.value))} 
-                        className="w-full bg-white border border-slate-200 rounded-lg text-xs text-slate-900 px-2 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[38px]"
+                        className="w-full bg-white border border-slate-200 rounded-xl text-base sm:text-sm text-slate-900 px-2 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
                       >
-                        <option value={25.5}>25.5% (Standard – software, equipment, services)</option>
-                        <option value={13.5}>13.5% (Reduced 2026 – books, hotel, public transport)</option>
-                        <option value={10}>10% (Reduced – newspapers & periodicals)</option>
-                        <option value={0}>0% (Exempt – insurance, banking, grants)</option>
+                        <option value={25.5}>25.5% (Standard 2026)</option>
+                        <option value={13.5}>13.5% (Reduced 2026)</option>
+                        <option value={10}>10% (Books)</option>
+                        <option value={0}>0% (Exempt)</option>
                       </select>
                     </div>
 
-                    <div className="sm:col-span-2">
-                      <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">Amount (incl. VAT)</label>
+                    <div>
+                      <label className="text-xs font-semibold text-slate-700 block mb-1">Amount (incl. VAT)</label>
                       <input 
                         type="number" 
                         step="0.01" 
                         value={item.amount || ''} 
                         onChange={(e) => updateItem(index, 'amount', parseFloat(e.target.value) || 0)} 
-                        className="w-full bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-right text-slate-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[38px]" 
+                        className="w-full bg-white border border-slate-200 rounded-xl text-base sm:text-sm font-mono font-bold text-right text-slate-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
                         placeholder="0.00"
                         required
                       />
@@ -332,17 +332,17 @@ const ExpenseForm: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs">
-                  <span className="font-mono text-slate-500">
+                <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs sm:text-sm">
+                  <span className="font-mono text-slate-600">
                     Row: <strong className="font-bold text-slate-900 tabular-nums">{formatFinnishCurrency(item.amount || 0)}</strong>
                   </span>
                   <button 
                     type="button"
                     onClick={() => removeItem(index)} 
-                    className="p-1.5 text-slate-400 hover:text-rose-600 transition min-h-[32px] min-w-[32px] flex items-center justify-center"
+                    className="p-2 text-slate-400 hover:text-rose-600 active:scale-95 transition min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg"
                     title="Delete row"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </div>

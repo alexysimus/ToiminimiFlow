@@ -80,7 +80,7 @@ const CustomerManager: React.FC = () => {
                 placeholder="e.g. Acme Oy or Matti Meikäläinen" 
                 value={editForm.name} 
                 onChange={e => setEditForm({...editForm, name: e.target.value})} 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
               />
             </div>
             <div>
@@ -89,7 +89,7 @@ const CustomerManager: React.FC = () => {
                 placeholder="e.g. 1234567-8" 
                 value={editForm.businessId} 
                 onChange={e => setEditForm({...editForm, businessId: e.target.value})} 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs font-mono text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
               />
             </div>
             <div>
@@ -98,7 +98,7 @@ const CustomerManager: React.FC = () => {
                 placeholder="invoicing@company.fi" 
                 value={editForm.email} 
                 onChange={e => setEditForm({...editForm, email: e.target.value})} 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
               />
             </div>
             <div>
@@ -107,20 +107,20 @@ const CustomerManager: React.FC = () => {
                 placeholder="Mannerheimintie 1, 00100 Helsinki" 
                 value={editForm.address} 
                 onChange={e => setEditForm({...editForm, address: e.target.value})} 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
               />
             </div>
           </div>
           <div className="flex justify-end space-x-2 pt-2 border-t border-slate-100">
             <button 
               onClick={() => setIsEditing(null)} 
-              className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition min-h-[40px]"
+              className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition min-h-[44px]"
             >
               Cancel
             </button>
             <button 
               onClick={handleSave} 
-              className="px-5 py-2 bg-[#003580] hover:bg-[#002868] text-white text-xs font-semibold rounded-xl shadow-xs transition min-h-[40px]"
+              className="px-5 py-2 bg-[#003580] hover:bg-[#002868] text-white text-xs font-semibold rounded-xl shadow-xs transition min-h-[44px]"
             >
               Save Customer
             </button>
@@ -134,11 +134,11 @@ const CustomerManager: React.FC = () => {
           <div key={c.id} className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-[#003580] transition relative group space-y-2 min-w-0">
             <div className="flex justify-between items-start gap-2 min-w-0">
               <div className="min-w-0 flex-1">
-                <h4 className="font-bold text-slate-900 text-sm tracking-tight truncate">
+                <h4 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight truncate">
                   <TextReveal text={c.name} label="Customer name" />
                 </h4>
                 {c.businessId && (
-                  <p className="text-[11px] font-mono text-slate-500 font-medium">
+                  <p className="text-xs font-mono text-slate-500 font-medium">
                     Business ID: {c.businessId}
                   </p>
                 )}
@@ -146,17 +146,17 @@ const CustomerManager: React.FC = () => {
               <div className="flex items-center space-x-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition">
                 <button 
                   onClick={() => startEdit(c)} 
-                  className="p-1.5 text-slate-500 hover:text-[#003580] hover:bg-slate-100 rounded-lg min-h-[36px] min-w-[36px] flex items-center justify-center"
+                  className="p-2 text-slate-500 hover:text-[#003580] hover:bg-slate-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
                   title="Edit"
                 >
-                  <Edit2 size={15} />
+                  <Edit2 size={16} />
                 </button>
                 <button 
                   onClick={() => handleDelete(c.id)} 
-                  className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg min-h-[36px] min-w-[36px] flex items-center justify-center"
+                  className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
                   title="Delete"
                 >
-                  <Trash2 size={15} />
+                  <Trash2 size={16} />
                 </button>
               </div>
             </div>

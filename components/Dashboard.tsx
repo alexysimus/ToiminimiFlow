@@ -49,6 +49,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isCalendarDownloaded, setIsCalendarDownloaded] = useState(false);
   const [isDeadlineBannerDismissed, setIsDeadlineBannerDismissed] = useState(false);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const carouselRef = React.useRef<HTMLDivElement>(null);
+
+  const handleCarouselScroll = () => {
+    if (!carouselRef.current) return;
+    const { scrollLeft, clientWidth } = carouselRef.current;
+    if (clientWidth > 0) {
+      const idx = Math.round(scrollLeft / (clientWidth * 0.85));
+      setActiveCardIndex(Math.min(3, Math.max(0, idx)));
+    }
+  };
+
+  const scrollToIndex = (idx: number) => {
+    if (!carouselRef.current) return;
+    const itemWidth = carouselRef.current.clientWidth * 0.86;
+    carouselRef.current.scrollTo({ left: idx * itemWidth, behavior: 'smooth' });
+    setActiveCardIndex(idx);
+  };
 
   useEffect(() => {
     refreshData();
@@ -388,59 +406,139 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* 4 Key Metric Cards in Finnish Format */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* Mobile Metric Swipeable Carousel (Visible on <640px) */}
+        <div className="sm:hidden space-y-2">
+          <div 
+            ref={carouselRef}
+            onScroll={handleCarouselScroll}
+            className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none gap-3 -mx-4 px-4 pb-1"
+          >
+            {/* Card 1: Total Revenue */}
+            <div className="w-[82vw] shrink-0 snap-center p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-1.5 shadow-2xs">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block truncate">
+                Net Sales / Turnover ({vatViewMode === 'vat_0' ? 'VAT 0%' : 'Incl. VAT'})
+              </span>
+              <div className="text-2xl font-bold font-mono tabular-nums text-slate-900 tracking-tight">
+                {formatFinnishCurrency(displayedIncome)}
+              </div>
+              <p className="text-xs text-slate-500">
+                {invoices.length} invoices · {settlements.length} settlements
+              </p>
+            </div>
+
+            {/* Card 2: Total Expenses */}
+            <div className="w-[82vw] shrink-0 snap-center p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-1.5 shadow-2xs">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block truncate">
+                Expenses ({vatViewMode === 'vat_0' ? 'VAT 0%' : 'Incl. VAT'})
+              </span>
+              <div className="text-2xl font-bold font-mono tabular-nums text-slate-900 tracking-tight">
+                {formatFinnishCurrency(displayedExpense)}
+              </div>
+              <p className="text-xs text-slate-500">
+                {expenses.length} receipts recorded
+              </p>
+            </div>
+
+            {/* Card 3: Net Profit */}
+            <div className="w-[82vw] shrink-0 snap-center p-4 bg-[#EDF4FC] border border-[#BFDBFE] rounded-2xl space-y-1.5 shadow-2xs">
+              <span className="text-xs font-bold text-[#003580] uppercase tracking-wider block truncate">
+                Operating Profit (Result)
+              </span>
+              <div className="text-2xl font-bold font-mono tabular-nums text-[#003580] tracking-tight">
+                {formatFinnishCurrency(taxSafe.netProfit)}
+              </div>
+              <p className="text-xs text-slate-600">
+                Taxable: {formatFinnishCurrency(taxSafe.taxableProfit)}
+              </p>
+            </div>
+
+            {/* Card 4: Safe Take-Home Pay */}
+            <div className="w-[82vw] shrink-0 snap-center p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-1.5 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider block truncate">
+                  Safe to Withdraw (Owner's Draw)
+                </span>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0 ml-1"></span>
+              </div>
+              <div className="text-2xl font-bold font-mono tabular-nums text-emerald-700 tracking-tight">
+                {formatFinnishCurrency(taxSafe.safeToWithdraw)}
+              </div>
+              <p className="text-xs text-emerald-800 font-medium">
+                100% safe for personal drawings
+              </p>
+            </div>
+          </div>
+
+          {/* Carousel Dot Indicators */}
+          <div className="flex items-center justify-center space-x-1.5 pt-1">
+            {[0, 1, 2, 3].map((idx) => (
+              <button
+                key={idx}
+                onClick={() => scrollToIndex(idx)}
+                aria-label={`Scroll to metric ${idx + 1}`}
+                className={`transition-all duration-200 rounded-full ${
+                  activeCardIndex === idx 
+                    ? 'w-5 h-2 bg-[#003580]' 
+                    : 'w-2 h-2 bg-slate-300 hover:bg-slate-400'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop / Tablet Grid (Hidden on Mobile) */}
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Total Revenue */}
-          <div className="p-3.5 sm:p-4 bg-slate-50/70 border border-slate-200/70 rounded-2xl space-y-1 min-w-0">
-            <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider block truncate">
+          <div className="p-4 bg-slate-50/70 border border-slate-200/70 rounded-2xl space-y-1.5 min-w-0">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block truncate">
               Net Sales / Turnover ({vatViewMode === 'vat_0' ? 'VAT 0%' : 'Incl. VAT'})
             </span>
-            <div className="text-lg sm:text-2xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
+            <div className="text-2xl xl:text-3xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
               {formatFinnishCurrency(displayedIncome)}
             </div>
-            <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
+            <p className="text-xs text-slate-500 truncate">
               {invoices.length} invoices · {settlements.length} settlements
             </p>
           </div>
 
           {/* Card 2: Total Expenses */}
-          <div className="p-3.5 sm:p-4 bg-slate-50/70 border border-slate-200/70 rounded-2xl space-y-1 min-w-0">
-            <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider block truncate">
+          <div className="p-4 bg-slate-50/70 border border-slate-200/70 rounded-2xl space-y-1.5 min-w-0">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block truncate">
               Expenses ({vatViewMode === 'vat_0' ? 'VAT 0%' : 'Incl. VAT'})
             </span>
-            <div className="text-lg sm:text-2xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
+            <div className="text-2xl xl:text-3xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
               {formatFinnishCurrency(displayedExpense)}
             </div>
-            <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
+            <p className="text-xs text-slate-500 truncate">
               {expenses.length} receipts recorded
             </p>
           </div>
 
           {/* Card 3: Net Profit */}
-          <div className="p-3.5 sm:p-4 bg-[#EDF4FC] border border-[#BFDBFE] rounded-2xl space-y-1 min-w-0">
-            <span className="text-[10px] sm:text-[11px] font-bold text-[#003580] uppercase tracking-wider block truncate">
+          <div className="p-4 bg-[#EDF4FC] border border-[#BFDBFE] rounded-2xl space-y-1.5 min-w-0">
+            <span className="text-xs font-bold text-[#003580] uppercase tracking-wider block truncate">
               Operating Profit (Result)
             </span>
-            <div className="text-lg sm:text-2xl font-bold font-mono tabular-nums text-[#003580] tracking-tight truncate">
+            <div className="text-2xl xl:text-3xl font-bold font-mono tabular-nums text-[#003580] tracking-tight truncate">
               {formatFinnishCurrency(taxSafe.netProfit)}
             </div>
-            <p className="text-[10px] sm:text-[11px] text-slate-600 truncate">
-              Taxable (after 5% relief): {formatFinnishCurrency(taxSafe.taxableProfit)}
+            <p className="text-xs text-slate-600 truncate">
+              Taxable: {formatFinnishCurrency(taxSafe.taxableProfit)}
             </p>
           </div>
 
           {/* Card 4: Safe Take-Home Pay */}
-          <div className="p-3.5 sm:p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-1 min-w-0">
+          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-1.5 min-w-0">
             <div className="flex items-center justify-between min-w-0">
-              <span className="text-[10px] sm:text-[11px] font-bold text-emerald-800 uppercase tracking-wider block truncate">
+              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider block truncate">
                 Safe to Withdraw (Owner's Draw)
               </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0 ml-1"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0 ml-1"></span>
             </div>
-            <div className="text-lg sm:text-2xl font-bold font-mono tabular-nums text-emerald-700 tracking-tight truncate">
+            <div className="text-2xl xl:text-3xl font-bold font-mono tabular-nums text-emerald-700 tracking-tight truncate">
               {formatFinnishCurrency(taxSafe.safeToWithdraw)}
             </div>
-            <p className="text-[10px] sm:text-[11px] text-emerald-800 font-medium truncate">
+            <p className="text-xs text-emerald-800 font-medium truncate">
               100% safe for personal drawings
             </p>
           </div>
@@ -489,7 +587,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           <div className="flex items-center bg-slate-100 p-1 rounded-xl self-stretch md:self-auto overflow-x-auto">
             <button
               onClick={() => setActiveTab('invoices')}
-              className={`flex-1 md:flex-initial px-3.5 py-1.5 text-xs font-semibold rounded-lg transition whitespace-nowrap min-h-[36px] ${
+              className={`flex-1 md:flex-initial px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg transition whitespace-nowrap min-h-[40px] ${
                 activeTab === 'invoices' ? 'bg-white text-[#003580] shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -497,7 +595,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </button>
             <button
               onClick={() => setActiveTab('expenses')}
-              className={`flex-1 md:flex-initial px-3.5 py-1.5 text-xs font-semibold rounded-lg transition whitespace-nowrap min-h-[36px] ${
+              className={`flex-1 md:flex-initial px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg transition whitespace-nowrap min-h-[40px] ${
                 activeTab === 'expenses' ? 'bg-white text-[#003580] shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -505,7 +603,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </button>
             <button
               onClick={() => setActiveTab('settlements')}
-              className={`flex-1 md:flex-initial px-3.5 py-1.5 text-xs font-semibold rounded-lg transition whitespace-nowrap min-h-[36px] ${
+              className={`flex-1 md:flex-initial px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg transition whitespace-nowrap min-h-[40px] ${
                 activeTab === 'settlements' ? 'bg-white text-[#003580] shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -515,14 +613,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
           {/* Search Input & Status Filters */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <div className="relative flex-1 sm:w-60">
-              <Search className="absolute left-3 top-2.5 text-slate-400" size={15} />
+            <div className="relative flex-1 sm:w-64">
+              <Search className="absolute left-3.5 top-3 text-slate-400" size={16} />
               <input
                 type="text"
                 placeholder="Search by customer, invoice #, item..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[38px]"
+                className="w-full pl-10 pr-3 py-2 text-base sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]"
               />
             </div>
 
@@ -532,9 +630,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   <button
                     key={filter}
                     onClick={() => setInvoiceFilter(filter)}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition min-h-[36px] ${
+                    className={`px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg transition min-h-[40px] ${
                       invoiceFilter === filter
-                        ? 'bg-[#003580] text-white'
+                        ? 'bg-[#003580] text-white shadow-xs'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
@@ -775,7 +873,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="block md:hidden divide-y divide-slate-100">
           {activeTab === 'invoices' && (
             filteredInvoices.length === 0 ? (
-              <div className="py-12 px-4 text-center text-slate-400 text-xs">
+              <div className="py-12 px-4 text-center text-slate-400 text-sm">
                 No invoices yet. Tap "New Invoice" above.
               </div>
             ) : (
@@ -785,18 +883,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   <div
                     key={inv.id}
                     onClick={() => setSelectedItem({ item: inv, type: 'invoice' })}
-                    className="p-4 active:bg-slate-50 transition cursor-pointer space-y-2.5"
+                    className="p-4 active:bg-slate-50 transition cursor-pointer space-y-3"
                   >
                     <div className="flex items-center justify-between min-w-0">
                       <div className="flex items-center space-x-2 min-w-0">
-                        <span className="font-mono font-bold text-xs text-[#003580] bg-blue-50 px-2 py-0.5 rounded-lg shrink-0">
+                        <span className="font-mono font-bold text-xs text-[#003580] bg-blue-50 px-2.5 py-1 rounded-lg shrink-0">
                           #{inv.invoiceNumber}
                         </span>
-                        <span className="font-bold text-xs text-slate-900 truncate">
+                        <span className="font-bold text-sm text-slate-900 truncate">
                           {inv.recipientName || 'Unnamed Customer'}
                         </span>
                       </div>
-                      <span className="font-mono font-bold text-sm text-slate-900 tabular-nums whitespace-nowrap shrink-0 ml-2">
+                      <span className="font-mono font-bold text-base text-slate-900 tabular-nums whitespace-nowrap shrink-0 ml-2">
                         {formatFinnishCurrency(gross)}
                       </span>
                     </div>
@@ -804,11 +902,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     <div className="flex items-center justify-between text-xs text-slate-500">
                       <div className="flex items-center space-x-2">
                         <span>Due date:</span>
-                        <span className="font-mono text-slate-700">{formatFinnishDate(inv.dueDate)}</span>
+                        <span className="font-mono text-slate-700 font-medium">{formatFinnishDate(inv.dueDate)}</span>
                       </div>
                       <button
                         onClick={(e) => handleTogglePaid(e, inv)}
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition min-h-[28px] ${
+                        className={`px-3 py-1 rounded-full text-xs font-bold transition min-h-[32px] ${
                           inv.isPaid 
                             ? 'bg-emerald-50 text-emerald-700' 
                             : 'bg-amber-50 text-amber-700'
@@ -818,27 +916,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-end space-x-2 pt-1 border-t border-slate-50" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => generateInvoicePDF(inv)}
-                        className="px-2.5 py-1 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-semibold flex items-center space-x-1 min-h-[36px]"
+                        className="px-3 py-2 text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-[0.98] rounded-xl text-xs font-semibold flex items-center space-x-1.5 min-h-[44px]"
                       >
-                        <Download size={14} />
+                        <Download size={15} />
                         <span>PDF</span>
                       </button>
                       <button
                         onClick={() => handleEdit(inv.id, 'invoice')}
-                        className="px-2.5 py-1 text-[#003580] bg-blue-50 hover:bg-blue-100 rounded-lg text-xs font-semibold flex items-center space-x-1 min-h-[36px]"
+                        className="px-3.5 py-2 text-[#003580] bg-blue-50 hover:bg-blue-100 active:scale-[0.98] rounded-xl text-xs font-semibold flex items-center space-x-1.5 min-h-[44px]"
                       >
-                        <Edit3 size={14} />
+                        <Edit3 size={15} />
                         <span>Edit</span>
                       </button>
                       <button
                         onClick={() => handleDelete(inv.id, 'invoice')}
-                        className="p-1.5 text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-lg transition min-h-[36px] min-w-[36px] flex items-center justify-center"
+                        className="p-2.5 text-rose-500 bg-rose-50 hover:bg-rose-100 active:scale-[0.98] rounded-xl transition min-h-[44px] min-w-[44px] flex items-center justify-center"
                         title="Delete"
                       >
-                        <Trash2 size={15} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
@@ -849,7 +947,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
           {activeTab === 'expenses' && (
             filteredExpenses.length === 0 ? (
-              <div className="py-12 px-4 text-center text-slate-400 text-xs">
+              <div className="py-12 px-4 text-center text-slate-400 text-sm">
                 No expenses yet. Tap "Add Expense" above.
               </div>
             ) : (
@@ -860,41 +958,41 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   <div
                     key={exp.id}
                     onClick={() => setSelectedItem({ item: exp, type: 'expense' })}
-                    className="p-4 active:bg-slate-50 transition cursor-pointer space-y-2.5"
+                    className="p-4 active:bg-slate-50 transition cursor-pointer space-y-3"
                   >
                     <div className="flex items-center justify-between min-w-0">
                       <div className="min-w-0 pr-2">
-                        <span className="font-bold text-xs text-slate-900 block truncate">
+                        <span className="font-bold text-sm text-slate-900 block truncate">
                           {desc}
                         </span>
-                        <span className="text-[10px] text-slate-500">
+                        <span className="text-xs text-slate-500">
                           {exp.items[0]?.category.split('(')[0] || 'Expense'}
                         </span>
                       </div>
-                      <span className="font-mono font-bold text-sm text-slate-900 tabular-nums whitespace-nowrap shrink-0">
+                      <span className="font-mono font-bold text-base text-slate-900 tabular-nums whitespace-nowrap shrink-0">
                         {formatFinnishCurrency(total)}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-50">
-                      <div className="flex items-center space-x-1 font-mono text-slate-600">
+                      <div className="flex items-center space-x-1.5 font-mono text-slate-600">
                         <span>Payment Date:</span>
-                        <span>{formatFinnishDate(exp.paymentDate)}</span>
+                        <span className="font-medium text-slate-800">{formatFinnishDate(exp.paymentDate)}</span>
                       </div>
                       <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => handleEdit(exp.id, 'expense')}
-                          className="px-2.5 py-1 text-[#003580] bg-blue-50 hover:bg-blue-100 rounded-lg text-xs font-semibold flex items-center space-x-1 min-h-[36px]"
+                          className="px-3.5 py-2 text-[#003580] bg-blue-50 hover:bg-blue-100 active:scale-[0.98] rounded-xl text-xs font-semibold flex items-center space-x-1.5 min-h-[44px]"
                         >
-                          <Edit3 size={14} />
+                          <Edit3 size={15} />
                           <span>Edit</span>
                         </button>
                         <button
                           onClick={() => handleDelete(exp.id, 'expense')}
-                          className="p-1.5 text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-lg transition min-h-[36px] min-w-[36px] flex items-center justify-center"
+                          className="p-2.5 text-rose-500 bg-rose-50 hover:bg-rose-100 active:scale-[0.98] rounded-xl transition min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Delete"
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>
@@ -906,7 +1004,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
           {activeTab === 'settlements' && (
             filteredSettlements.length === 0 ? (
-              <div className="py-12 px-4 text-center text-slate-400 text-xs">
+              <div className="py-12 px-4 text-center text-slate-400 text-sm">
                 No sales settlements recorded.
               </div>
             ) : (
@@ -914,37 +1012,38 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <div
                   key={s.id}
                   onClick={() => setSelectedItem({ item: s, type: 'settlement' })}
-                  className="p-4 active:bg-slate-50 transition cursor-pointer space-y-2"
+                  className="p-4 active:bg-slate-50 transition cursor-pointer space-y-2.5"
                 >
                   <div className="flex items-center justify-between min-w-0">
                     <div className="min-w-0 pr-2">
-                      <span className="font-bold text-xs text-[#003580] block truncate">
+                      <span className="font-bold text-sm text-[#003580] block truncate">
                         {s.provider}
                       </span>
-                      <span className="text-[10px] text-slate-500 truncate block">
+                      <span className="text-xs text-slate-500 truncate block">
                         {s.description}
                       </span>
                     </div>
                     <div className="text-right whitespace-nowrap shrink-0">
-                      <span className="font-mono font-bold text-sm text-emerald-700 tabular-nums block">
+                      <span className="font-mono font-bold text-base text-emerald-700 tabular-nums block">
                         {formatFinnishCurrency(s.netAmount)}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-mono">
+                      <span className="text-xs text-slate-400 font-mono">
                         Gross {formatFinnishCurrency(s.grossAmount)}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-50">
-                    <span className="font-mono">{formatFinnishDate(s.date)}</span>
+                    <span className="font-mono font-medium text-slate-700">{formatFinnishDate(s.date)}</span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(s.id, 'settlement');
                       }}
-                      className="p-1.5 text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-lg transition min-h-[36px] min-w-[36px] flex items-center justify-center"
+                      className="p-2.5 text-rose-500 bg-rose-50 hover:bg-rose-100 active:scale-[0.98] rounded-xl transition min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      title="Delete"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>

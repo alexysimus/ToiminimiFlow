@@ -257,7 +257,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                   </h3>
                 )}
                 {subtitle && (
-                  <p className="text-[11px] text-slate-500 truncate">
+                  <p className="text-xs text-slate-500 truncate">
                     {subtitle}
                   </p>
                 )}
@@ -268,10 +268,10 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               {headerRight}
               <button
                 onClick={triggerClose}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-full bg-slate-100 hover:bg-slate-200 transition min-h-[36px] min-w-[36px] flex items-center justify-center"
-                aria-label="Sulje"
+                className="p-2.5 text-slate-400 hover:text-slate-700 active:scale-95 rounded-full bg-slate-100 hover:bg-slate-200 transition min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Close modal"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
           </div>

@@ -162,5 +162,40 @@ All numerical, temporal, and financial values must adhere to the Finnish nationa
 | **Due Date** | *Eräpäivä* | Last payment date of an invoice |
 | **Payment Terms** | *Maksuehto* | Payment window in days (e.g. 14 pv) |
 | **Payment Slip** | *Tilisiirtolomake* | Standard invoice bottom payment slip |
-| **MyTax Portal** | *OmaVero* | Official Vero.fi electronic portal |
+## 8. Cross-OS Compatibility (iOS, Android, Windows, macOS, Linux)
+
+While Toiminimi Flow embodies Apple HIG elegance, it is engineered for flawless cross-platform performance across all major operating systems:
+
+| OS / Platform | Primary Input & Screen Trait | Optimization & Compatibility Guard |
+| :--- | :--- | :--- |
+| **iOS / iPadOS** | Touch screen, Safari engine (WebKit), notch/Dynamic Island | `min-h-[44px]` touch targets, `.pt-safe`/`.pb-safe` safe area insets, `text-base sm:text-sm` (16px minimum on touch) to prevent Safari viewport auto-zoom on input focus, haptic vibration support, smooth inertia scrolling. |
+| **Android** | Touch screen, Chrome/Blink engine, hardware/gesture back nav | Chrome pull-to-refresh coordination (`touch-action: pan-y`), native PWA installation banner, scroll snap with standard touch resistance, `theme-color: #003580` address bar styling. |
+| **macOS** | Mouse cursor, trackpad pinch/swipe, Retina displays | Discrete hover states (`hover:bg-slate-50`), smooth trackpad scrolling, Commissioner font rendering with subpixel antialiasing (`-webkit-font-smoothing: antialiased`). |
+| **Windows** | Mouse cursor, high-DPI scaling, standard scrollbars | Custom minimal cross-browser scrollbars, standard keyboard accessibility (`Tab`, `Escape`, `Enter`), no horizontal overflow clipping on narrow windows. |
+| **Linux** | Open-source desktop environments (GNOME, KDE) | System font fallbacks (`-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`), cross-browser CSS variables. |
+
+---
+
+## 9. Mobile Metric Carousel & Table-to-Card Reflow
+
+### Mobile Horizontal Scroll-Snap Carousel
+On mobile viewports (`< 640px`):
+- The top 4 KPI metric cards (Turnover, Expenses, Net Profit, Safe to Withdraw) reflow into a **CSS scroll-snap horizontal carousel** (`overflow-x-auto snap-x snap-mandatory scrollbar-none`).
+- Each card occupies `82vw` to provide natural peek visibility for adjacent cards.
+- Interactive and synchronized **dot indicators** below provide spatial orientation and 1-tap jumping.
+- On tablet & desktop (`>= 640px`), the cards seamlessly render as a responsive 2-column or 4-column high-density grid.
+
+### Mobile Table-to-Card Reflow
+- Multi-column tables (Invoices, Expenses, Driver's log, Tax Deadlines) cause horizontal scrolling and layout breakage on mobile devices (`< 768px`).
+- Below 768px, all tables automatically reflow into **Apple-style grouped inset cards** with clear primary typography, prominent euro numbers, high-contrast status pills, and minimum 44×44px touch targets.
+
+---
+
+## 10. Progressive Web App (PWA) & Offline Architecture
+
+Toiminimi Flow operates as a native-grade Progressive Web App:
+- **Web App Manifest** (`public/manifest.json`): Standalone display mode, Finnish flag theme `#003580`, 512×512 SVG app icon, Finnish localization descriptions.
+- **Service Worker** (`public/sw.js`): Offline caching with cache-first app shell and stale-while-revalidate static assets, enabling instant load times and offline bookkeeping during flights or train commutes in rural Finland.
+- **SEO & Social Cards**: Semantic JSON-LD structured data (`WebApplication`), OpenGraph and Twitter cards, crawler-friendly `robots.txt`.
+
 

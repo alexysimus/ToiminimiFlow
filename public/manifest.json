@@ -1,0 +1,26 @@
+{
+  "name": "Toiminimi Flow - Finnish Tax & Accounting",
+  "short_name": "Flow",
+  "description": "Comprehensive Finnish toiminimi single-entry accounting and invoicing suite with 2026 Vero statutory compliance.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#003580",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["finance", "business", "productivity"],
+  "lang": "fi"
+}

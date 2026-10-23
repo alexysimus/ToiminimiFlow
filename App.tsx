@@ -66,19 +66,19 @@ const App: React.FC = () => {
   const DesktopNavItem = ({ tab, icon: Icon, label, badge }: { tab: Tab, icon: any, label: string, badge?: string }) => (
     <button 
       onClick={() => handleTabSelect(tab)}
-      className={`w-full flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-200 mb-1 group relative min-h-[44px] ${
+      className={`w-full flex items-center px-3.5 py-3 rounded-xl transition-all duration-200 mb-1.5 group relative min-h-[48px] ${
         activeTab === tab 
           ? 'bg-[#003580] text-white font-semibold shadow-xs' 
           : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
       }`}
     >
       <div className="flex items-center w-full min-w-0">
-        <Icon size={18} strokeWidth={activeTab === tab ? 2.2 : 1.8} className={`shrink-0 ${activeTab === tab ? 'text-white' : 'text-slate-400 group-hover:text-slate-700'}`} />
+        <Icon size={20} strokeWidth={activeTab === tab ? 2.2 : 1.8} className={`shrink-0 ${activeTab === tab ? 'text-white' : 'text-slate-400 group-hover:text-slate-700'}`} />
         {isSidebarOpen && (
           <div className="ml-3 flex items-center justify-between flex-1 min-w-0">
-            <span className="text-xs truncate">{label}</span>
+            <span className="text-sm truncate">{label}</span>
             {badge && (
-              <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0 ml-1.5 ${
+              <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0 ml-1.5 ${
                 activeTab === tab ? 'bg-white/20 text-white' : 'bg-blue-100 text-[#003580]'
               }`}>
                 {badge}
@@ -95,18 +95,18 @@ const App: React.FC = () => {
     return (
       <button
         onClick={() => handleTabSelect(tab)}
-        className={`flex flex-col items-center justify-center flex-1 py-1 min-h-[48px] active:scale-95 transition-transform ${
-          isActive ? 'text-[#003580] font-semibold' : 'text-slate-400 hover:text-slate-600'
+        className={`flex flex-col items-center justify-center flex-1 py-1 min-h-[50px] active:scale-95 transition-transform ${
+          isActive ? 'text-[#003580] font-semibold' : 'text-slate-500 hover:text-slate-700'
         }`}
       >
-        <Icon size={20} strokeWidth={isActive ? 2.4 : 1.8} className={isActive ? 'text-[#003580]' : 'text-slate-400'} />
-        <span className="text-[10px] tracking-tight mt-0.5 truncate max-w-[64px]">{label}</span>
+        <Icon size={22} strokeWidth={isActive ? 2.4 : 1.8} className={isActive ? 'text-[#003580]' : 'text-slate-400'} />
+        <span className="text-xs tracking-tight mt-0.5 truncate max-w-[68px]">{label}</span>
       </button>
     );
   };
 
   return (
-    <div className="min-h-screen bg-[#F2F2F7] md:bg-[#F8FAFC] flex font-sans selection:bg-[#003580]/15 selection:text-[#003580]">
+    <div className="min-h-dvh h-dvh bg-[#F2F2F7] md:bg-[#F8FAFC] flex selection:bg-[#003580]/15 selection:text-[#003580] overflow-hidden">
       {/* Desktop Sidebar Navigation (Hidden on mobile < 768px) */}
       <aside 
         className={`
@@ -124,10 +124,10 @@ const App: React.FC = () => {
             {isSidebarOpen && (
               <div className="ml-3 min-w-0">
                 <div className="flex items-center space-x-1.5">
-                  <h1 className="text-base font-bold text-slate-900 tracking-tight leading-none truncate">Flow</h1>
-                  <span className="text-[10px] font-bold text-[#003580] bg-[#EDF4FC] px-1.5 py-0.5 rounded shrink-0">2026</span>
+                  <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-none truncate">Flow</h1>
+                  <span className="text-xs font-bold text-[#003580] bg-[#EDF4FC] px-2 py-0.5 rounded-full shrink-0">2026</span>
                 </div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mt-1 truncate">Sole Trader Suite</p>
+                <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mt-1 truncate">Sole Trader Suite</p>
               </div>
             )}
           </div>
@@ -155,19 +155,19 @@ const App: React.FC = () => {
             <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-2 mt-auto">
               <button
                 onClick={() => setIsPrepaymentGuideOpen(true)}
-                className="w-full text-left text-[11px] font-semibold text-slate-700 hover:text-[#003580] flex items-center justify-between min-h-[36px]"
+                className="w-full text-left text-xs font-semibold text-slate-700 hover:text-[#003580] flex items-center justify-between min-h-[40px] px-1"
               >
                 <span className="truncate">Tax Guide for Beginners</span>
-                <HelpCircle size={14} className="text-[#003580] shrink-0 ml-1" />
+                <HelpCircle size={16} className="text-[#003580] shrink-0 ml-1" />
               </button>
               <a
                 href={VERO_LINKS.OMAVERO}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full text-left text-[11px] font-semibold text-[#003580] flex items-center justify-between hover:underline min-h-[36px]"
+                className="w-full text-left text-xs font-semibold text-[#003580] flex items-center justify-between hover:underline min-h-[40px] px-1"
               >
                 <span className="truncate">Open MyTax (OmaVero)</span>
-                <ExternalLink size={13} className="shrink-0 ml-1" />
+                <ExternalLink size={14} className="shrink-0 ml-1" />
               </a>
             </div>
           ) : null}
@@ -175,36 +175,36 @@ const App: React.FC = () => {
           {/* Collapse Toggle */}
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="absolute -right-3 top-10 bg-white text-slate-500 hover:text-slate-800 p-1.5 rounded-full shadow-sm hover:scale-105 transition border border-slate-200 min-h-[32px] min-w-[32px] flex items-center justify-center"
+            className="absolute -right-3 top-10 bg-white text-slate-500 hover:text-slate-800 p-1.5 rounded-full shadow-sm hover:scale-105 transition border border-slate-200 min-h-[36px] min-w-[36px] flex items-center justify-center"
             title={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
-            {isSidebarOpen ? <ChevronLeft size={13} /> : <ChevronRight size={13} />}
+            {isSidebarOpen ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
           </button>
         </div>
       </aside>
 
       {/* Main Viewport */}
-      <main className="flex-1 overflow-y-auto h-screen bg-[#F2F2F7] md:bg-[#F8FAFC]">
+      <main className="flex-1 overflow-y-auto h-full bg-[#F2F2F7] md:bg-[#F8FAFC]">
         {/* Apple HIG Frosted Top Bar */}
-        <header className="sticky top-0 z-30 ios-glass border-b border-slate-200/70 px-4 md:px-6 py-2.5 md:py-3 flex items-center justify-between pt-safe">
-          <div className="flex items-center space-x-2 text-xs text-slate-500 min-w-0">
-            <div className="flex items-center space-x-1.5 min-w-0">
-              <span className="font-bold text-slate-900 text-sm md:text-xs capitalize truncate">
+        <header className="sticky top-0 z-30 ios-glass border-b border-slate-200/70 px-4 md:px-6 py-3 flex items-center justify-between pt-safe">
+          <div className="flex items-center space-x-2 text-xs text-slate-600 min-w-0">
+            <div className="flex items-center space-x-2 min-w-0">
+              <span className="font-bold text-slate-900 text-base sm:text-lg capitalize truncate">
                 {getTabTitle(activeTab)}
               </span>
               <span className="text-slate-300">·</span>
-              <span className="text-slate-600 font-medium shrink-0">2026</span>
+              <span className="text-slate-600 font-semibold text-xs shrink-0">2026</span>
             </div>
             <span className="hidden sm:inline text-slate-300">·</span>
-            <span className="hidden sm:inline text-[#003580] font-medium truncate">Finnish Tax Administration Compliant</span>
+            <span className="hidden sm:inline text-[#003580] font-semibold text-xs truncate">Verohallinto Compliant</span>
           </div>
 
           <div className="flex items-center space-x-2 shrink-0">
             <button
               onClick={() => setIsPrepaymentGuideOpen(true)}
-              className="px-2.5 md:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-[#003580] hover:bg-slate-100 rounded-xl transition flex items-center space-x-1 min-h-[36px]"
+              className="px-3 py-2 text-xs font-semibold text-slate-700 hover:text-[#003580] hover:bg-slate-100 rounded-xl transition flex items-center space-x-1.5 min-h-[40px]"
             >
-              <HelpCircle size={14} className="text-[#003580]" />
+              <HelpCircle size={16} className="text-[#003580]" />
               <span className="hidden sm:inline">Tax Guide</span>
             </button>
 
@@ -212,10 +212,10 @@ const App: React.FC = () => {
               href={VERO_LINKS.OMAVERO}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1.5 bg-[#003580] hover:bg-[#002868] text-white text-xs font-semibold rounded-xl shadow-2xs transition flex items-center space-x-1 min-h-[36px]"
+              className="px-3.5 py-2 bg-[#003580] hover:bg-[#002868] text-white text-xs font-semibold rounded-xl shadow-2xs transition flex items-center space-x-1.5 min-h-[40px]"
             >
               <span>MyTax</span>
-              <ArrowUpRight size={13} />
+              <ArrowUpRight size={14} />
             </a>
           </div>
         </header>
@@ -242,12 +242,12 @@ const App: React.FC = () => {
             isMoreSheetOpen ? 'text-[#003580] font-semibold' : 'text-slate-400 hover:text-slate-600'
           }`}
         >
-          <MoreHorizontal size={20} strokeWidth={isMoreSheetOpen ? 2.4 : 1.8} />
-          <span className="text-[10px] tracking-tight mt-0.5">More</span>
+          <MoreHorizontal size={22} strokeWidth={isMoreSheetOpen ? 2.4 : 1.8} />
+          <span className="text-xs font-medium tracking-tight mt-0.5">More</span>
         </button>
       </nav>
 
-      {/* Gesture-Driven iOS "More" BottomSheet Modal */}
+      {/* Gesture-Driven iOS / Touch "More" BottomSheet Modal */}
       <BottomSheet
         isOpen={isMoreSheetOpen}
         onClose={() => setIsMoreSheetOpen(false)}
@@ -262,15 +262,15 @@ const App: React.FC = () => {
               className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-white text-left transition min-h-[48px]"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-xl bg-blue-100 text-[#003580] flex items-center justify-center font-bold">
-                  <Car size={16} />
+                <div className="w-9 h-9 rounded-xl bg-blue-100 text-[#003580] flex items-center justify-center font-bold">
+                  <Car size={18} />
                 </div>
                 <div>
-                  <span className="text-xs font-semibold text-slate-900 block">Deductions & Travel</span>
-                  <span className="text-[10px] text-slate-500">Driver's log, home office (Form 5 line 378)</span>
+                  <span className="text-sm font-semibold text-slate-900 block">Deductions & Travel</span>
+                  <span className="text-xs text-slate-500">Driver's log, home office (Form 5 line 378)</span>
                 </div>
               </div>
-              <ChevronRight size={16} className="text-slate-400" />
+              <ChevronRight size={18} className="text-slate-400" />
             </button>
 
             <button
@@ -278,15 +278,15 @@ const App: React.FC = () => {
               className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-white text-left transition min-h-[48px]"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
-                  <Users size={16} />
+                <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+                  <Users size={18} />
                 </div>
                 <div>
-                  <span className="text-xs font-semibold text-slate-900 block">Customers</span>
-                  <span className="text-[10px] text-slate-500">Client directory and invoicing details</span>
+                  <span className="text-sm font-semibold text-slate-900 block">Customers</span>
+                  <span className="text-xs text-slate-500">Client directory and invoicing details</span>
                 </div>
               </div>
-              <ChevronRight size={16} className="text-slate-400" />
+              <ChevronRight size={18} className="text-slate-400" />
             </button>
 
             <button
@@ -294,15 +294,15 @@ const App: React.FC = () => {
               className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-white text-left transition min-h-[48px]"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                  <Building2 size={16} />
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                  <Building2 size={18} />
                 </div>
                 <div>
-                  <span className="text-xs font-semibold text-slate-900 block">Business Details</span>
-                  <span className="text-[10px] text-slate-500">Business ID (Y-tunnus), IBAN & tax settings</span>
+                  <span className="text-sm font-semibold text-slate-900 block">Business Details</span>
+                  <span className="text-xs text-slate-500">Business ID (Y-tunnus), IBAN & tax settings</span>
                 </div>
               </div>
-              <ChevronRight size={16} className="text-slate-400" />
+              <ChevronRight size={18} className="text-slate-400" />
             </button>
 
             <button
@@ -310,15 +310,15 @@ const App: React.FC = () => {
               className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-white text-left transition min-h-[48px]"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-                  <Database size={16} />
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                  <Database size={18} />
                 </div>
                 <div>
-                  <span className="text-xs font-semibold text-slate-900 block">Backup & Export</span>
-                  <span className="text-[10px] text-slate-500">Download or restore JSON accounting data</span>
+                  <span className="text-sm font-semibold text-slate-900 block">Backup & Export</span>
+                  <span className="text-xs text-slate-500">Download or restore JSON accounting data</span>
                 </div>
               </div>
-              <ChevronRight size={16} className="text-slate-400" />
+              <ChevronRight size={18} className="text-slate-400" />
             </button>
           </div>
 
@@ -332,15 +332,15 @@ const App: React.FC = () => {
               className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-white text-left transition min-h-[48px]"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-bold">
-                  <HelpCircle size={16} />
+                <div className="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-bold">
+                  <HelpCircle size={18} />
                 </div>
                 <div>
-                  <span className="text-xs font-semibold text-slate-900 block">Beginner's Tax Guide</span>
-                  <span className="text-[10px] text-slate-500">How sole trader taxation works in Finland</span>
+                  <span className="text-sm font-semibold text-slate-900 block">Beginner's Tax Guide</span>
+                  <span className="text-xs text-slate-500">How sole trader taxation works in Finland</span>
                 </div>
               </div>
-              <ChevronRight size={16} className="text-slate-400" />
+              <ChevronRight size={18} className="text-slate-400" />
             </button>
 
             <a
@@ -350,15 +350,15 @@ const App: React.FC = () => {
               className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-white text-left transition min-h-[48px]"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-xl bg-blue-100 text-[#003580] flex items-center justify-center font-bold">
-                  <ArrowUpRight size={16} />
+                <div className="w-9 h-9 rounded-xl bg-blue-100 text-[#003580] flex items-center justify-center font-bold">
+                  <ArrowUpRight size={18} />
                 </div>
                 <div>
-                  <span className="text-xs font-semibold text-slate-900 block">MyTax (OmaVero)</span>
-                  <span className="text-[10px] text-slate-500">Official Finnish Tax Administration portal</span>
+                  <span className="text-sm font-semibold text-slate-900 block">MyTax (OmaVero)</span>
+                  <span className="text-xs text-slate-500">Official Finnish Tax Administration portal</span>
                 </div>
               </div>
-              <ExternalLink size={14} className="text-slate-400" />
+              <ExternalLink size={16} className="text-slate-400" />
             </a>
           </div>
         </div>

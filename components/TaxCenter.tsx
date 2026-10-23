@@ -196,39 +196,39 @@ export const TaxCenter: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-slate-100 bg-white">
           {/* 1. Prepayment Taxes */}
           <div className="p-4 sm:p-5 space-y-1 min-w-0">
-            <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block truncate">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block truncate">
               Prepayment Tax (Estimate)
             </span>
-            <div className="text-lg sm:text-2xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
+            <div className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
               {formatFinnishCurrency(estimatedPrepayment)}
             </div>
-            <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
+            <p className="text-xs text-slate-500 truncate">
               Tax on profit ({formatFinnishPercent(taxSettings.personalTaxRate)})
             </p>
           </div>
 
           {/* 2. Value Added Tax */}
           <div className="p-4 sm:p-5 space-y-1 min-w-0">
-            <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block truncate">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block truncate">
               Value Added Tax (VAT / ALV)
             </span>
-            <div className="text-lg sm:text-2xl font-bold font-mono tabular-nums text-[#003580] tracking-tight truncate">
+            <div className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-[#003580] tracking-tight truncate">
               {formatFinnishCurrency(vatPayable)}
             </div>
-            <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
+            <p className="text-xs text-slate-500 truncate">
               VAT payable to Tax Administration
             </p>
           </div>
 
           {/* 3. VAT Period */}
           <div className="p-4 sm:p-5 space-y-2 min-w-0">
-            <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block truncate">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block truncate">
               VAT Tax Period
             </span>
             <select
               value={taxSettings.vatPeriod}
               onChange={(e) => handleVatPeriodChange(e.target.value as TaxSettings['vatPeriod'])}
-              className="text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 w-full focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[36px]"
+              className="text-base sm:text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 w-full focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
             >
               <option value="year">Annual (Feb 28)</option>
               <option value="quarter">Quarterly</option>
@@ -240,13 +240,13 @@ export const TaxCenter: React.FC = () => {
           {/* 4. Current Tax Rate */}
           <div className="p-4 sm:p-5 space-y-2 min-w-0">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block truncate">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block truncate">
                 Personal Tax Rate
               </span>
               {!isEditingRate && (
                 <button
                   onClick={() => setIsEditingRate(true)}
-                  className="text-[10px] text-[#003580] font-semibold hover:underline min-h-[28px] flex items-center"
+                  className="text-xs text-[#003580] font-semibold hover:underline min-h-[28px] flex items-center"
                 >
                   Edit
                 </button>
@@ -259,18 +259,18 @@ export const TaxCenter: React.FC = () => {
                   type="text"
                   value={tempRate}
                   onChange={(e) => setTempRate(e.target.value)}
-                  className="w-14 text-xs font-mono font-bold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800"
+                  className="w-16 text-base sm:text-xs font-mono font-bold bg-slate-50 border border-slate-300 rounded-lg px-2 py-1.5 text-slate-800 min-h-[36px]"
                 />
-                <span className="text-xs font-bold text-slate-500">%</span>
+                <span className="text-sm font-bold text-slate-500">%</span>
                 <button
                   onClick={handleSaveTaxRate}
-                  className="px-2 py-1 bg-[#003580] text-white text-[10px] font-bold rounded min-h-[28px]"
+                  className="px-3 py-1.5 bg-[#003580] text-white text-xs font-bold rounded-lg min-h-[36px]"
                 >
                   OK
                 </button>
               </div>
             ) : (
-              <div className="text-lg sm:text-2xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
+              <div className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
                 {formatFinnishPercent(taxSettings.personalTaxRate)}
               </div>
             )}
@@ -370,40 +370,40 @@ export const TaxCenter: React.FC = () => {
             const isDueSoon = daysRemaining >= 0 && daysRemaining <= 14;
 
             return (
-              <div key={dl.id} className="p-4 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-2">
+              <div key={dl.id} className="p-4 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-2.5">
                 <div className="flex items-start justify-between gap-2 min-w-0">
                   <div className="min-w-0">
-                    <h4 className="font-bold text-xs text-slate-900 truncate">{dl.title}</h4>
+                    <h4 className="font-bold text-sm text-slate-900 truncate">{dl.title}</h4>
                   </div>
                   {isOverdue ? (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 shrink-0">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 shrink-0">
                       Overdue
                     </span>
                   ) : isDueSoon ? (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 shrink-0">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 shrink-0">
                       Due soon · {daysRemaining} d
                     </span>
                   ) : (
-                    <span className="text-[10px] text-slate-500 shrink-0">
+                    <span className="text-xs text-slate-500 font-medium shrink-0">
                       {daysRemaining} d
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-200/60">
+                <div className="flex items-center justify-between text-xs pt-1.5 border-t border-slate-200/60">
                   <div>
-                    <span className="text-slate-500 text-[10px] block">Due Date</span>
-                    <span className="font-mono font-bold text-slate-900">{formatFinnishDate(dl.dueDate)}</span>
+                    <span className="text-slate-500 text-xs block">Due Date</span>
+                    <span className="font-mono font-bold text-slate-900 text-sm">{formatFinnishDate(dl.dueDate)}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-slate-500 text-[10px] block">Estimated Tax</span>
-                    <span className="font-mono font-bold text-sm text-[#003580] tabular-nums">
+                    <span className="text-slate-500 text-xs block">Estimated Tax</span>
+                    <span className="font-mono font-bold text-base text-[#003580] tabular-nums">
                       {dl.estimatedAmount !== undefined ? formatFinnishCurrency(dl.estimatedAmount) : '—'}
                     </span>
                   </div>
                 </div>
 
-                <p className="text-[11px] text-slate-600 leading-relaxed pt-1">
+                <p className="text-xs text-slate-600 leading-relaxed pt-1">
                   {dl.description}
                 </p>
 
@@ -412,7 +412,7 @@ export const TaxCenter: React.FC = () => {
                     onClick={handleExportCalendar}
                     className="flex-1 py-2 px-3 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 active:scale-[0.98] border border-slate-200 rounded-xl transition flex items-center justify-center space-x-1.5 min-h-[44px]"
                   >
-                    <Calendar size={14} className="text-[#003580]" />
+                    <Calendar size={15} className="text-[#003580]" />
                     <span>To Calendar</span>
                   </button>
 
@@ -423,7 +423,7 @@ export const TaxCenter: React.FC = () => {
                     className="flex-1 py-2 px-3 text-xs font-semibold text-[#003580] bg-blue-50 hover:bg-blue-100 active:scale-[0.98] border border-blue-200/60 rounded-xl transition flex items-center justify-center space-x-1.5 min-h-[44px]"
                   >
                     <span>Vero Guide</span>
-                    <ArrowUpRight size={14} />
+                    <ArrowUpRight size={15} />
                   </a>
                 </div>
               </div>

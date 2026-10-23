@@ -1,11 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
     <meta name="color-scheme" content="light" />
-    <title>Toiminimi Flow - Finnish Tax & Accounting</title>
-    <meta name="description" content="Comprehensive Finnish toiminimi single-entry accounting suite and OP Kevytyrittäjä replacement, featuring 2026 Vero statutory rules, VAT tracking, Form 5 helper, and mileage log." />
+    <meta name="text-scale" content="scale" />
+
+    <title>Toiminimi Flow - Finnish Sole Trader Tax & Accounting</title>
+    <meta name="description" content="100% free, privacy-first Finnish toiminimi single-entry accounting and invoicing suite with 2026 Vero statutory compliance, VAT tracking, Form 5 helper, and mileage log." />
+    <meta name="keywords" content="toiminimi, kirjanpito, laskutusohjelma, lomake 5, vero 2026, alv laskuri, yrittäjävähennys, ajopäiväkirja, sole trader, finland" />
+
+    <!-- PWA & Mobile Web App Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon.svg" />
+    <meta name="theme-color" content="#003580" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Flow" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- OpenGraph & Social Cards -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Toiminimi Flow" />
+    <meta property="og:title" content="Toiminimi Flow - Finnish Sole Trader Accounting & Invoicing" />
+    <meta property="og:description" content="100% free, privacy-first single-entry accounting suite for Finnish sole traders (toiminimi). Features 2026 Vero rules, VAT safe, and Form 5 assistant." />
+    <meta property="og:image" content="/icons/icon.svg" />
+    <meta property="og:locale" content="fi_FI" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Toiminimi Flow - Finnish Sole Trader Accounting" />
+    <meta name="twitter:description" content="100% free, privacy-first single-entry accounting suite for Finnish sole traders with 2026 Vero compliance." />
+
+    <!-- Schema.org WebApplication JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Toiminimi Flow",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "description": "Comprehensive Finnish toiminimi single-entry accounting and invoicing suite with 2026 Vero statutory compliance."
+    }
+    </script>
+
+    <!-- Tailwind CDN Config -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -19,23 +63,29 @@
         }
       }
     </script>
+
+    <!-- Fonts: Commissioner & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-      html, body {
-        font-family: 'Commissioner', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background-color: #F8FAFC;
-      }
-      .font-mono {
-        font-family: 'JetBrains Mono', monospace;
-        font-variant-numeric: tabular-nums;
-      }
-    </style>
+
     <link rel="stylesheet" href="/index.css">
   </head>
   <body>
     <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module" src="/index.tsx"></script>
+
+    <!-- Service Worker Registration for PWA Offline Functionality -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then((registration) => {
+            console.log('Toiminimi Flow ServiceWorker registered with scope:', registration.scope);
+          }).catch((err) => {
+            console.warn('ServiceWorker registration skipped:', err);
+          });
+        });
+      }
+    </script>
+  </body>
 </html>

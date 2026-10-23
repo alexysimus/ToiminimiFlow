@@ -93,7 +93,7 @@ const BusinessInfoForm: React.FC = () => {
                 value={info.name}
                 onChange={(e) => setInfo({...info, name: e.target.value})}
                 placeholder="e.g. Tmi Alex Developer"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
               />
             </div>
 
@@ -103,7 +103,7 @@ const BusinessInfoForm: React.FC = () => {
                 value={info.businessId}
                 onChange={(e) => setInfo({...info, businessId: e.target.value})}
                 placeholder="1234567-8"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs font-mono font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
               />
             </div>
 
@@ -113,7 +113,7 @@ const BusinessInfoForm: React.FC = () => {
                 value={info.email}
                 onChange={(e) => setInfo({...info, email: e.target.value})}
                 placeholder="alex@example.fi"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
               />
             </div>
 
@@ -123,7 +123,7 @@ const BusinessInfoForm: React.FC = () => {
                 value={info.address}
                 onChange={(e) => setInfo({...info, address: e.target.value})}
                 placeholder="Mannerheimintie 10 B, 00100 Helsinki"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
               />
             </div>
 
@@ -133,7 +133,7 @@ const BusinessInfoForm: React.FC = () => {
                 value={info.phone}
                 onChange={(e) => setInfo({...info, phone: e.target.value})}
                 placeholder="+358 40 123 4567"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
               />
             </div>
           </div>
@@ -152,7 +152,7 @@ const BusinessInfoForm: React.FC = () => {
               <select
                 value={taxSettings.vatPeriod}
                 onChange={(e) => setTaxSettings({...taxSettings, vatPeriod: e.target.value as TaxSettings['vatPeriod']})}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
               >
                 <option value="year">Calendar Year (Due Feb 28)</option>
                 <option value="quarter">Quarterly (Due May 12, Aug 12, Nov 12, Feb 12)</option>
@@ -169,7 +169,7 @@ const BusinessInfoForm: React.FC = () => {
                   step="0.5"
                   value={taxSettings.personalTaxRate}
                   onChange={(e) => setTaxSettings({...taxSettings, personalTaxRate: parseFloat(e.target.value) || 0})}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3.5 pr-8 py-2.5 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3.5 pr-8 py-2.5 text-base sm:text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
                 />
                 <span className="absolute right-3 top-2.5 text-xs font-bold text-slate-400">%</span>
               </div>
@@ -184,7 +184,7 @@ const BusinessInfoForm: React.FC = () => {
                   value={taxSettings.prepaymentTaxAssessed || ''}
                   placeholder="0.00"
                   onChange={(e) => setTaxSettings({...taxSettings, prepaymentTaxAssessed: parseFloat(e.target.value) || 0})}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-7 pr-3 py-2.5 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[42px]"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-7 pr-3 py-2.5 text-base sm:text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
                 />
                 <span className="absolute left-3 top-2.5 text-xs font-bold text-slate-400">€</span>
               </div>
@@ -201,7 +201,7 @@ const BusinessInfoForm: React.FC = () => {
             </h3>
             <button 
               onClick={addBankAccount}
-              className="text-xs flex items-center text-[#003580] hover:text-[#002255] font-semibold min-h-[36px]"
+              className="text-xs flex items-center text-[#003580] hover:text-[#002255] font-semibold min-h-[40px] px-2 py-1"
             >
               <Plus size={15} className="mr-1" /> Add Account
             </button>
@@ -214,7 +214,7 @@ const BusinessInfoForm: React.FC = () => {
                   <span className="text-xs font-bold text-slate-700">Account Details</span>
                   <button 
                     onClick={() => removeAccount(acc.id)}
-                    className="p-1 text-slate-400 hover:text-rose-600 transition min-h-[32px] min-w-[32px] flex items-center justify-end"
+                    className="p-2 text-slate-400 hover:text-rose-600 transition min-h-[44px] min-w-[44px] flex items-center justify-end"
                     title="Remove account"
                   >
                     <Trash2 size={16} />
@@ -222,30 +222,30 @@ const BusinessInfoForm: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Account Label / Bank</label>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Account Label / Bank</label>
                     <input 
                       placeholder="e.g. OP Business Account"
                       value={acc.label}
                       onChange={(e) => updateAccount(acc.id, 'label', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:ring-1 focus:ring-[#003580] min-h-[38px]"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-base sm:text-xs text-slate-900 font-medium focus:ring-1 focus:ring-[#003580] min-h-[44px]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">IBAN Account Number</label>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">IBAN Account Number</label>
                     <input 
                       placeholder="FI21 1234 5600 0007 89"
                       value={acc.iban}
                       onChange={(e) => updateAccount(acc.id, 'iban', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono font-medium text-slate-900 focus:ring-1 focus:ring-[#003580] min-h-[38px]"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-base sm:text-xs font-mono font-medium text-slate-900 focus:ring-1 focus:ring-[#003580] min-h-[44px]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">BIC / SWIFT</label>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">BIC / SWIFT</label>
                     <input 
                       placeholder="OKOYFIHH"
                       value={acc.bic}
                       onChange={(e) => updateAccount(acc.id, 'bic', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono font-medium text-slate-900 focus:ring-1 focus:ring-[#003580] min-h-[38px]"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-base sm:text-xs font-mono font-medium text-slate-900 focus:ring-1 focus:ring-[#003580] min-h-[44px]"
                     />
                   </div>
                 </div>

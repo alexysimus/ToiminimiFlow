@@ -254,41 +254,41 @@ const InvoiceForm: React.FC = () => {
         <h3 className="text-xs font-bold text-[#003580] uppercase tracking-wider">
           1. Basic Invoice Details
         </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Invoice Number</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">Invoice Number</label>
             <input 
               type="text" 
               value={invoice.invoiceNumber}
               onChange={(e) => setInvoice({...invoice, invoiceNumber: e.target.value})}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[40px]"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base sm:text-sm font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Invoice Date</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">Invoice Date</label>
             <input 
               type="date" 
               value={invoice.invoiceDate}
               onChange={(e) => handleDateOrDurationChange('invoiceDate', e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[40px]"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Due Date</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">Due Date</label>
             <input 
               type="date" 
               value={invoice.dueDate}
               onChange={(e) => handleDueDateChange(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-[#003580] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[40px]"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base sm:text-sm font-bold text-[#003580] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Payment Terms (days)</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">Payment Terms (days)</label>
             <input 
               type="number" 
               value={invoice.paymentDuration}
               onChange={(e) => handleDateOrDurationChange('paymentDuration', e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[40px]"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
             />
           </div>
         </div>
@@ -297,76 +297,76 @@ const InvoiceForm: React.FC = () => {
       {/* Grouped Inset Section 2: Recipient and Bank Account */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Recipient */}
-        <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-xs space-y-3">
+        <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-xs space-y-3.5">
           <div className="flex items-center justify-between pb-1">
             <h3 className="text-xs font-bold text-[#003580] uppercase tracking-wider">
               2. Recipient (Customer)
             </h3>
             {customers.length > 0 && (
               <select 
-                className="text-[11px] bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 cursor-pointer min-h-[32px] max-w-[150px] truncate"
+                className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 cursor-pointer min-h-[36px] max-w-[170px] truncate"
                 onChange={handleCustomerSelect}
                 defaultValue=""
               >
-                <option value="" disabled>Select saved customer</option>
+                <option value="" disabled>Saved customer...</option>
                 {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             )}
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Customer / Company Name *</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Customer / Company Name *</label>
               <input 
                 placeholder="e.g. Acme Oy or Jane Doe" 
                 value={invoice.recipientName} 
                 onChange={(e) => setInvoice({...invoice, recipientName: e.target.value})} 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[40px]" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base sm:text-sm text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Invoice Email</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Invoice Email</label>
               <input 
                 placeholder="billing@client.com" 
                 value={invoice.recipientEmail} 
                 onChange={(e) => setInvoice({...invoice, recipientEmail: e.target.value})} 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[40px]" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Billing Address</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Billing Address</label>
               <textarea 
                 placeholder="Street address, postal code and city" 
                 rows={2} 
                 value={invoice.recipientAddress} 
                 onChange={(e) => setInvoice({...invoice, recipientAddress: e.target.value})} 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580]" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base sm:text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580]" 
               />
             </div>
           </div>
         </div>
 
         {/* Bank & Reference */}
-        <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-xs space-y-3">
+        <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-xs space-y-3.5">
           <h3 className="text-xs font-bold text-[#003580] uppercase tracking-wider">
             3. Bank Details & Reference
           </h3>
 
           <div className="space-y-3">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Finnish Reference Number (Viitenumero)</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Finnish Reference Number (Viitenumero)</label>
               <input 
                 type="text" 
                 value={invoice.referenceNumber}
                 onChange={(e) => setInvoice({...invoice, referenceNumber: e.target.value})}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[40px]"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base sm:text-sm font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Billing Bank Account</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Billing Bank Account</label>
               <select 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[40px]"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base sm:text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
                 onChange={handleBankSelect}
                 value={businessInfo.bankAccounts.find(b => b.iban === invoice.senderIban)?.id || ''}
               >
@@ -407,78 +407,78 @@ const InvoiceForm: React.FC = () => {
               key={item.id} 
               className="bg-slate-50/70 p-3.5 sm:p-4 rounded-xl border border-slate-200 space-y-3"
             >
-              {/* Responsive Line Item: Stacked on mobile, multi-column on tablet/desktop */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+              {/* Responsive Line Item: Apple HIG Inset Card Layout */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
                 <div className="sm:col-span-4">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Description / Specification</label>
+                  <label className="text-xs font-semibold text-slate-700 mb-1 block">Description / Specification *</label>
                   <input 
                     placeholder="e.g. Web development services" 
                     value={item.description} 
                     onChange={(e) => updateItem(index, 'description', e.target.value)} 
-                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[38px]" 
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-base sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Date of Delivery / Work</label>
+                  <label className="text-xs font-semibold text-slate-700 mb-1 block">Date of Work</label>
                   <input 
                     type="date" 
                     value={item.dateOfWork} 
                     onChange={(e) => updateItem(index, 'dateOfWork', e.target.value)} 
-                    className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[38px]" 
+                    className="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-base sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
                   />
                 </div>
 
-                <div className="grid grid-cols-3 sm:contents gap-2">
-                  <div className="sm:col-span-2">
-                    <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Quantity</label>
+                <div className="grid grid-cols-2 sm:col-span-3 gap-2">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 mb-1 block">Quantity</label>
                     <input 
                       type="number" 
                       step="0.5" 
                       value={item.quantity} 
                       onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value) || 0)} 
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-xs text-center font-mono font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[38px]" 
+                      className="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-base sm:text-sm text-center font-mono font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
                     />
                   </div>
 
-                  <div className="sm:col-span-2">
-                    <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Unit Price (incl. VAT)</label>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 mb-1 block">Unit Price</label>
                     <input 
                       type="number" 
                       step="0.01" 
                       value={item.unitPrice} 
                       onChange={(e) => updateItem(index, 'unitPrice', parseFloat(e.target.value) || 0)} 
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-xs text-right font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[38px]" 
+                      className="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-base sm:text-sm text-right font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]" 
                     />
                   </div>
+                </div>
 
-                  <div className="sm:col-span-2">
-                    <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">VAT Rate</label>
-                    <select 
-                      value={item.vatRate} 
-                      onChange={(e) => updateItem(index, 'vatRate', parseFloat(e.target.value))} 
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[38px]"
-                    >
-                      <option value={25.5}>25.5% (Standard rate – services, consulting, goods)</option>
-                      <option value={13.5}>13.5% (Reduced rate 2026 – food, restaurants, books, hotel)</option>
-                      <option value={10}>10% (Reduced rate – newspapers & periodicals)</option>
-                      <option value={0}>0% (Exempt / Zero-rated – export, intra-EU sales 0%)</option>
-                    </select>
-                  </div>
+                <div className="sm:col-span-3">
+                  <label className="text-xs font-semibold text-slate-700 mb-1 block">VAT Rate (ALV)</label>
+                  <select 
+                    value={item.vatRate} 
+                    onChange={(e) => updateItem(index, 'vatRate', parseFloat(e.target.value))} 
+                    className="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-base sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
+                  >
+                    <option value={25.5}>25.5% (Standard 2026)</option>
+                    <option value={13.5}>13.5% (Reduced 2026)</option>
+                    <option value={10}>10% (Books, periodicals)</option>
+                    <option value={0}>0% (Zero-rate / Intra-EU)</option>
+                  </select>
                 </div>
               </div>
 
               {/* Row Total & Delete button */}
-              <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs">
-                <span className="font-mono text-slate-500">
+              <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs sm:text-sm">
+                <span className="font-mono text-slate-600">
                   Line Total: <strong className="font-bold text-slate-900 tabular-nums">{formatFinnishCurrency((item.quantity || 0) * (item.unitPrice || 0))}</strong>
                 </span>
                 <button 
                   onClick={() => removeItem(index)} 
-                  className="p-1.5 text-slate-400 hover:text-rose-600 transition min-h-[32px] min-w-[32px] flex items-center justify-center"
+                  className="p-2 text-slate-400 hover:text-rose-600 active:scale-95 transition min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg"
                   title="Delete row"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={18} />
                 </button>
               </div>
             </div>
