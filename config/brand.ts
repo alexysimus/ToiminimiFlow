@@ -25,7 +25,7 @@ export const BRAND_CONFIG: BrandConfig = {
   tagline: 'Privacy-First Accounting & Invoicing for Sole Traders in Finland',
   authorName: import.meta.env.VITE_AUTHOR_NAME || 'Alex & Open Source Contributors',
   githubUrl: import.meta.env.VITE_GITHUB_REPO_URL || 'https://github.com/alexysimus/ToiminimiFlow',
-  kofiUrl: import.meta.env.VITE_KOFI_URL || 'https://ko-fi.com/your_username',
+  kofiUrl: import.meta.env.VITE_KOFI_URL || 'https://ko-fi.com/daocongthanh',
   customDomainUrl: import.meta.env.VITE_APP_URL || 'https://toiminimiflow.fi',
   supportEmail: import.meta.env.VITE_SUPPORT_EMAIL || 'support@toiminimiflow.fi',
   license: 'MIT',
