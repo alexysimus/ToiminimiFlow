@@ -1,0 +1,6 @@
+# GitHub Sponsors & Community Funding Configuration
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+
+github: [alexysimus]
+ko_fi: your_kofi_username
+custom: ['https://ko-fi.com/your_username']

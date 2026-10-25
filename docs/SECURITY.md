@@ -49,3 +49,61 @@ Instead, report it privately via GitHub:
 3. Detail the nature of the issue and steps to reproduce.
 
 We will review reports promptly and publish patches with appropriate attribution.
+
+---
+
+## 5. Open-Source Environment Variables & Secret Separation Standard
+
+To adhere to industry-standard open-source governance and Twelve-Factor App principles, all project configuration follows strict classification:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        OPEN-SOURCE CREDENTIAL CLASSIFICATION                           │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+  [Tier A: Public in Git]        [Tier B: Local / Env Secret]      [Tier C: Cloud Console ONLY]
+  • .env.example (template)      • .env / .env.local               • Apple Auth Key (.p8 file)
+  • config/brand.ts              • Real VITE_FIREBASE_API_KEY      • OAuth Client Secrets
+  • .github/FUNDING.yml          • Real VITE_GA_MEASUREMENT_ID     • Firebase Service Account JSON
+  • firebase.json routing        • Local test Gemini API keys      • DNS Registrar API tokens
+```
+
+### 1. Distinction Between Public Identifiers and Private Credentials
+- **Client Identifiers (Public-Facing)**:
+  - In browser single-page applications (SPAs), Firebase `apiKey`, `authDomain`, `projectId`, and Google Analytics `measurementId` are bundled into client-side JavaScript.
+  - While they are public identifiers rather than access tokens, in open-source projects they must **never be hardcoded** in source files.
+  - Hardcoding client IDs allows forks or malicious actors to direct test traffic, spam registrations, or quota-exhaustion attacks against your personal Firebase project.
+  - Always use `import.meta.env.VITE_*` with graceful offline fallback when variables are empty.
+
+- **Private Credentials (Strictly Secret)**:
+  - Apple Native Sign-In `.p8` private keys, Key IDs, Team IDs, Firebase Admin Service Account JSONs, and domain registrar tokens must **never** be checked into git or placed in client `.env` files.
+  - Apple Developer authentication keys are entered directly and exclusively into the **Firebase Console** (*Authentication > Sign-in method > Apple*). The client app only interfaces through Firebase Auth SDK.
+
+---
+
+## 6. GDPR Compliance & Cookieless Analytics Standard (No Cookie Banner)
+
+In the European Union and Finland, digital privacy is governed by the **General Data Protection Regulation (GDPR)** and the **ePrivacy Directive** (enforced by the Finnish Transport and Communications Agency *Traficom* and the Office of the Data Protection Ombudsman *Tietosuojavaltuutettu*):
+
+### 1. Why Standard Google Analytics Requires a Banner
+- Standard GA4 configurations write first-party persistent cookies (`_ga`, `_ga_<container-id>`) and pseudonymous client identifiers (`clientId`) to user devices to track individuals across sessions.
+- Under Finnish and EU regulations, accessing or storing any non-essential data on a user's terminal equipment requires **prior, explicit, affirmative consent** (opt-in cookie banner).
+
+### 2. The Cookieless / Zero-Consent Solution
+To maintain 100% legal compliance **without subjecting sole traders to disruptive cookie banners**:
+- **Default Consent Denial (Google Consent Mode v2)**:
+  ```javascript
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied'
+  });
+  ```
+- **Operational Effect**:
+  1. No cookies (`_ga`, etc.) or `localStorage` tokens are created on the user's browser.
+  2. Analytics requests are transmitted as stateless, anonymous statistical pings without persistent identifiers.
+  3. No cross-site or cross-session tracking occurs.
+  4. Fully compliant with EU ePrivacy rules without requiring a cookie consent banner.
+- **Graceful Open-Source Fallback**:
+  - In Toiminimi Flow, telemetry is 100% disabled if `VITE_GA_MEASUREMENT_ID` is empty. Anyone self-hosting or cloning the application runs a completely untracked, offline instance by default.
+

@@ -153,3 +153,48 @@ flowchart TD
    - iOS: "Add to Home Screen" operates with full standalone status bar treatment, safe-area insets (`env(safe-area-inset-top)` / `bottom`), and disabled elastic bounce on root containers.
    - Android & Desktop (Chrome/Edge): Native install prompt support, custom launcher squircle icons (`public/icons/icon.svg`), and background sync readiness.
 
+---
+
+## 6. Open-Source Configuration & Environment Architecture
+
+To keep the open-source codebase modular, forkable, and strictly decoupled from instance-specific deployments, configuration is handled across three layers:
+
+```mermaid
+flowchart LR
+    subgraph Layer1 ["1. Public Source Code"]
+        Brand["config/brand.ts"]
+        EnvEx[".env.example"]
+        Funding[".github/FUNDING.yml"]
+        FirebaseJson["firebase.json"]
+    end
+
+    subgraph Layer2 ["2. Local Development (Ignored)"]
+        EnvLocal[".env / .env.local"]
+    end
+
+    subgraph Layer3 ["3. Production Secrets (External)"]
+        GHA["GitHub Repository Secrets"]
+        FBConsole["Firebase Console (OAuth / Apple .p8)"]
+    end
+
+    EnvLocal -->|Vite Dev Build| Runtime["App Client Runtime"]
+    GHA -->|CI/CD Deploy| Runtime
+    Brand --> Runtime
+    FBConsole -.->|OAuth Token Flow| Runtime
+```
+
+### 1. Centralized Brand & Metadata Hub (`config/brand.ts`)
+- Manages creator attribution, Ko-fi coffee sponsorship links, GitHub repository URLs, and custom production domains (`toiminimiflow.fi`).
+- Contains reactive getters (`isCustomDomainConfigured`, `hasSponsorLink`) ensuring UI cards gracefully hide or display sponsor links without code edits.
+
+### 2. Tier 2 Firebase Authentication Blueprint (Planned)
+- Supports **Google Sign-In** and **Apple Native Sign-In** strictly via standard OAuth providers.
+- No user credentials, passwords, or emails are stored in an application database.
+- Private Apple `.p8` keys reside exclusively within the Firebase Console and never touch git commits or client code.
+- If Firebase environment variables are omitted or empty, the app seamlessly defaults to 100% offline Tier 1 Guest Mode.
+
+### 3. Cookieless GDPR Telemetry Pipeline (Planned)
+- Telemetry wrapper loaded conditionally only when `VITE_GA_MEASUREMENT_ID` is present.
+- Configured with Google Consent Mode v2 (`analytics_storage: 'denied'`, `ad_storage: 'denied'`).
+- Sends stateless, aggregate technical pings without writing cookies or tracking identifiers across sessions, exempting the application from mandatory EU cookie consent modals.
+

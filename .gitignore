@@ -17,6 +17,10 @@ dist-ssr
 .env
 .env.*
 !.env.example
+service-account*.json
+*.p8
+*.key
+*.pem
 
 # AI Studio & IDE Caches
 .aistudio

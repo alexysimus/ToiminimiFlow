@@ -26,6 +26,9 @@ cd ToiminimiFlow
 # Install dependencies
 npm install
 
+# Optional: Copy environment template (app runs 100% offline without it)
+cp .env.example .env.local
+
 # Start development server
 npm run dev
 ```
@@ -85,3 +88,15 @@ Both commands must exit with code `0` (zero errors).
    ```
 4. Open a **Pull Request (PR)** against the `main` branch of [alexysimus/ToiminimiFlow](https://github.com/alexysimus/ToiminimiFlow).
 5. Describe your change, what problem it solves, and how you verified it.
+
+---
+
+## PR Security & Hygiene Checklist
+
+Before opening your Pull Request, verify:
+- [ ] No `.env` or `.env.local` files are tracked in git (`git status`).
+- [ ] No personal API keys, Apple `.p8` keys, or service account credentials appear in diffs.
+- [ ] All new user-facing environment variables are documented with dummy placeholders in `.env.example`.
+- [ ] Public branding or project links are referenced through `config/brand.ts`.
+- [ ] Synthetic Finnish test data is used (e.g. `1234567-8` for Y-tunnus, `FI21 1234...` for IBAN).
+- [ ] `npm run lint` and `npm run build` both exit with `0` errors.
