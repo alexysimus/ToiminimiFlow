@@ -56,7 +56,7 @@ Toiminimi Flow is designed with a strict **privacy-first, zero-knowledge** philo
 ### Tier 1: Instant Guest Mode (Default)
 - **Start Immediately**: No account creation or password required. Open the web app and begin invoicing and tracking deductions right away.
 - **On-Device Storage**: Data stays entirely on your device (`localStorage` / cache).
-- **Lightweight Receipt References**: Because browser `localStorage` has a ~5MB quota, receipts can be referenced via direct **URLs or file paths** (Google Drive, iCloud, Dropbox, or local folders) with zero quota limitations.
+- **Zero-Storage Receipt References & 1-Click Local Folder Access**: Because browser `localStorage` has a ~5MB quota, receipts are never stored as bloated Base64 strings (0 bytes binary). Instead, connect your local receipt folder once via the **W3C File System Access API** to open local PDFs/images in 1 click, or reference external URLs (Google Drive, iCloud, Dropbox, OneDrive) with zero quota limitations.
 
 ### Tier 2: Registered Cloud Sync (Future Firebase Backend)
 - **Minimalist Auth**: Strictly **Google OAuth** and **Apple Sign-In** (no custom password databases or email collection).
@@ -102,8 +102,9 @@ Toiminimi Flow is designed with a strict **privacy-first, zero-knowledge** philo
 - **Progressive Web App (PWA) Offline Architecture**:
   - Installable on iOS (Safari Home Screen), Android (Chrome), Windows, and macOS.
   - Service worker caching (`public/sw.js`) guarantees 100% offline functionality without internet connectivity.
-- **Data Backup & Audit Trail**:
-  - Export and restore complete JSON backups.
+- **Sync-Ready Data Backup & Audit Trail (Schema v2)**:
+  - Export and restore complete Schema v2 JSON backups with cryptographic `deviceId`, soft-delete tombstones (`deletedAt`), and unbacked change tracking (`dirtyCount`).
+  - Connect and manage your local receipts folder directly from the browser via IndexedDB handles.
   - Append-only audit trail logging all invoice and expense creations, updates, and deletions.
 
 ---
@@ -114,16 +115,17 @@ All tax parameters are centralized in [`services/veroTaxEngine.ts`](services/ver
 
 ```typescript
 export const VERO_CONSTANTS = {
-  MILEAGE_RATE_2026: 0.55,           // €/km in 2026
-  PASSENGER_RATE_2026: 0.04,         // €/km per extra passenger
-  HOME_OFFICE_TIER_1: 980,           // Over 50% home working days
-  HOME_OFFICE_TIER_2: 490,           // 25% - 50% home working days
-  HOME_OFFICE_TIER_3: 245,           // Occasional remote work
-  STANDARD_VAT_RATE: 25.5,           // Standard VAT in Finland (since 1.9.2024)
-  REDUCED_VAT_RATE_2026: 13.5,       // 2026 reduced VAT
-  VAT_EXEMPTION_THRESHOLD: 20000,    // Small business threshold (€20,000)
-  YEL_MANDATORY_THRESHOLD: 9208,     // Statutory minimum annual YEL income
-  ENTREPRENEURIAL_DEDUCTION_RATE: 0.05 // 5% Entrepreneur Relief (Yrittäjävähennys)
+  MILEAGE_RATE_2026: 0.55,                    // €/km in 2026
+  PASSENGER_RATE_2026: 0.04,                  // €/km per extra passenger
+  HOME_OFFICE_TIER_1: 980,                    // Over 50% home working days
+  HOME_OFFICE_TIER_2: 490,                    // 25% - 50% home working days
+  HOME_OFFICE_TIER_3: 245,                    // Occasional remote work
+  STANDARD_VAT_RATE: 25.5,                    // Standard VAT in Finland (since 1.9.2024)
+  REDUCED_VAT_RATE_2026: 13.5,                // 2026 reduced VAT
+  VAT_EXEMPTION_THRESHOLD: 20000,             // Small business threshold (€20,000)
+  YEL_MANDATORY_THRESHOLD: 9423.09,           // 2026 statutory minimum annual YEL income
+  UNEMPLOYMENT_SECURITY_THRESHOLD_2026: 15481,// 2026 Kela / Yrittäjäkassa threshold
+  ENTREPRENEURIAL_DEDUCTION_RATE: 0.05        // 5% Entrepreneur Relief (Yrittäjävähennys)
 };
 ```
 
@@ -138,9 +140,9 @@ export const VERO_CONSTANTS = {
 ### Installation & Local Run
 
 ```bash
-# 1. Clone your repository
-git clone https://github.com/YOUR_USERNAME/toiminimi-flow.git
-cd toiminimi-flow
+# 1. Clone the repository
+git clone https://github.com/alexysimus/ToiminimiFlow.git
+cd ToiminimiFlow
 
 # 2. Install dependencies
 npm install
