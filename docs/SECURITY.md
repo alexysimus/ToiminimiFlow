@@ -9,7 +9,7 @@ Because Toiminimi Flow manages business invoicing, client databases, and tax dat
 
 1. **Client-Side Data Ownership**: In Tier 1 (Guest Mode), no financial data, invoice details, client names, or profit numbers are ever sent to an external server. Everything is stored locally in the user's browser.
 2. **No Data Mining or Tracking**: Zero analytics trackers, zero advertisement SDKs, and zero telemetry.
-3. **Bring Your Own Key (BYOK)**: Any optional cloud AI features (e.g., Gemini receipt scanner) rely on user-owned API keys rather than shared central credentials.
+3. **Bring Your Own Cloud (BYOC)**: Any optional cloud synchronization (Google Drive / iCloud) operates strictly within user-owned personal storage spaces without third-party data collection.
 
 ---
 
@@ -64,7 +64,7 @@ To adhere to industry-standard open-source governance and Twelve-Factor App prin
   • .env.example (template)      • .env / .env.local               • Apple Auth Key (.p8 file)
   • config/brand.ts              • Real VITE_FIREBASE_API_KEY      • OAuth Client Secrets
   • .github/FUNDING.yml          • Real VITE_GA_MEASUREMENT_ID     • Firebase Service Account JSON
-  • firebase.json routing        • Local test Gemini API keys      • DNS Registrar API tokens
+  • firebase.json routing        • Local development overrides     • DNS Registrar API tokens
 ```
 
 ### 1. Distinction Between Public Identifiers and Private Credentials

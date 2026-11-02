@@ -23,7 +23,7 @@ To balance zero-friction onboarding with modern multi-device convenience, the sy
 │ • Runs 100% on-device in browser storage     │ │ • Firebase Authentication backend            │
 │ • No backend servers or user tracking        │ │ • Cloud receipt archival (Drive/iCloud/GCS)  │
 │ • Receipts stored via Link / File Path       │ │ • Seamless cross-device encrypted sync       │
-│ • Complete single-entry bookkeeping & PDF    │ │ • Multimodal Gemini AI Receipt Scanner       │
+│ • Complete single-entry bookkeeping & PDF    │ │ • Zero cloud lock-in: user owns their data   │
 │ • Form 5 & VAT OmaVero 1-click helpers       │ │ • Total privacy: only Auth ID is preserved   │
 └──────────────────────────────────────────────┘ └──────────────────────────────────────────────┘
 ```
@@ -38,7 +38,6 @@ To balance zero-friction onboarding with modern multi-device convenience, the sy
 - **Authentication**: Strict **Google OAuth** and **Apple Sign-In** only. No custom password databases, no unvetted credential storage.
 - **Personal Cloud Storage**: Receipts upload directly to personal cloud storage (Google Drive, iCloud, or Firebase Cloud Storage).
 - **Encrypted Sync**: Firebase Firestore / Storage manages cross-device synchronization between mobile and desktop while maintaining end-to-end data ownership.
-- **Multimodal AI Receipt Scanner**: Automated receipt processing using Google Gemini 2.5 Flash, extracting dates, amounts, and VAT categories.
 
 ---
 
@@ -78,7 +77,6 @@ graph TD
         Store["services/storageService.ts (CRUD & Reference Gen)"]
         PDF["services/pdfService.ts (jsPDF Finnish Payment Slip)"]
         Cal["services/calendarService.ts (RFC 5545 .ics Export)"]
-        Gemini["services/geminiService.ts (Tier 2 AI OCR)"]
     end
 
     Root --> App
@@ -91,7 +89,6 @@ graph TD
     Dash & TaxC & Deduct --> Vero
     InvForm & ExpForm & Dash & TaxC --> Format
     InvForm --> PDF
-    ExpForm -.-> Gemini
     Dash & TaxC --> Cal
     Dash & TaxC & Deduct & InvForm & ExpForm & CustMgr & BizForm & DataBak --> Store
 ```

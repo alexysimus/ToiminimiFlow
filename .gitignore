@@ -30,6 +30,12 @@ service-account*.json
 .agents/
 .agent/
 seoo-skill-pack/
+scripts/
+AI_WRITING_PERSONA.md
+
+# Local data backups & exports
+*.backup.json
+*varmuuskopio*.json
 
 # Editor directories and files
 .vscode/*

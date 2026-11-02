@@ -1,13 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Trash2, Save, Upload, Sparkles, Loader2, Check, Edit3, ArrowLeft, CheckCircle2, Link2, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, Save, Upload, Sparkles, Check, Edit3, ArrowLeft, CheckCircle2, Link2, ExternalLink } from 'lucide-react';
 import { Expense, ExpenseItem, ExpenseCategory } from '../types';
 import { storageService } from '../services/storageService';
-import { analyzeReceipt } from '../services/geminiService';
 import { formatFinnishCurrency } from '../services/formatUtils';
 
 const ExpenseForm: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const [expense, setExpense] = useState<Expense>(() => {
@@ -52,40 +50,11 @@ const ExpenseForm: React.FC = () => {
 
   const totalExpense = expense.items.reduce((acc, item) => acc + (item.amount || 0), 0);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const base64Data = e.target?.result as string;
-      const cleanBase64 = base64Data.split(',')[1];
-      setExpense(prev => ({ ...prev, receiptUrl: base64Data }));
-      try {
-        setIsAnalyzing(true);
-        const analysis = await analyzeReceipt(cleanBase64, file.type);
-        if (analysis) {
-          const newItems: ExpenseItem[] = analysis.items.map((item: any) => ({
-            id: storageService.generateId(),
-            description: item.description || 'Receipt purchase',
-            amount: item.amount || 0,
-            category: Object.values(ExpenseCategory).includes(item.category) 
-              ? item.category 
-              : ExpenseCategory.SERVICE,
-            vatRate: 25.5
-          }));
-          setExpense(prev => ({ 
-            ...prev, 
-            paymentDate: analysis.date || prev.paymentDate, 
-            items: [...prev.items.filter(i => i.description.trim() !== ''), ...newItems] 
-          }));
-        }
-      } catch (err) { 
-        alert("Receipt received. You can review or fill in the expense items manually below."); 
-      } finally { 
-        setIsAnalyzing(false); 
-      }
-    };
-    reader.readAsDataURL(file);
+    // Store only the filename/reference - keeping localStorage lightweight and privacy-first
+    setExpense(prev => ({ ...prev, receiptUrl: file.name }));
   };
 
   const addRow = () => {
@@ -201,18 +170,11 @@ const ExpenseForm: React.FC = () => {
               />
             </div>
 
-            {isAnalyzing && (
-              <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-xl flex items-center space-x-2 text-xs text-[#003580]">
-                <Loader2 className="animate-spin" size={16} />
-                <span className="font-semibold">AI is analyzing receipt...</span>
-              </div>
-            )}
-
-            {expense.receiptUrl && !isAnalyzing && (
+            {expense.receiptUrl && (
               <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-800">
                 <div className="flex items-center space-x-2 min-w-0">
                   <Check size={14} className="text-emerald-600 shrink-0" />
-                  <span className="font-semibold truncate">Receipt voucher attached</span>
+                  <span className="font-semibold truncate">Receipt voucher: {expense.receiptUrl}</span>
                 </div>
                 {expense.receiptUrl.startsWith('http') && (
                   <a

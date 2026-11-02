@@ -48,7 +48,7 @@ Toiminimi Flow is designed with a strict **privacy-first, zero-knowledge** philo
 │ • Runs 100% on-device in browser storage     │ │ • Firebase Authentication backend            │
 │ • No backend servers or user tracking        │ │ • Cloud receipt archival (Drive/iCloud/GCS)  │
 │ • Receipts stored via Link / File Path       │ │ • Seamless cross-device encrypted sync       │
-│ • Complete single-entry bookkeeping & PDF    │ │ • Multimodal Gemini AI Receipt Scanner       │
+│ • Complete single-entry bookkeeping & PDF    │ │ • Zero cloud lock-in: user owns their data   │
 │ • Form 5 & VAT OmaVero 1-click helpers       │ │ • Total privacy: only Auth ID is preserved   │
 └──────────────────────────────────────────────┘ └──────────────────────────────────────────────┘
 ```
@@ -61,7 +61,7 @@ Toiminimi Flow is designed with a strict **privacy-first, zero-knowledge** philo
 ### Tier 2: Registered Cloud Sync (Future Firebase Backend)
 - **Minimalist Auth**: Strictly **Google OAuth** and **Apple Sign-In** (no custom password databases or email collection).
 - **Personal Cloud Storage**: Receipts upload directly to personal cloud storage (Google Drive, iCloud, or Firebase Storage).
-- **Gemini Receipt AI**: Automated OCR extraction of payment dates, amounts, and Finnish tax categories via Google Gemini 2.5 Flash.
+- **Encrypted Sync**: Seamless multi-device synchronization with end-to-end user data ownership.
 
 ---
 
@@ -181,7 +181,7 @@ Because Toiminimi Flow runs completely client-side in Tier 1, it costs **€0 / 
 - [ ] **EPC SEPA QR Code**: Render EPC SEPA QR codes on invoice slips to support mobile banking scans (OP, Nordea, S-Pankki) for Revolut Pro (`LT...`) and Wise (`BE...`) accounts.
 - [ ] **ISO 11649 RF Reference Generator**: 1-click toggle between domestic Finnish *viitenumero* and international `RF` references.
 - [ ] **Periodic VAT Return Helper**: Dedicated quarterly/monthly OmaVero ALV modal for Box 301, Box 307, and Box 308.
-- [ ] **Tier 2 Firebase Integration**: Google & Apple Sign-In, Cloud Storage for receipts, and Gemini 2.5 Flash receipt OCR.
+- [ ] **Tier 2 Firebase Integration**: Google & Apple Sign-In, and personal cloud storage sync for receipts.
 - [ ] **Asset Depreciation (*Poistot*)**: Tracking capital investments over €1,200 depreciated at 25% reducing balance on Form 5 Line 372.
 
 ---
