@@ -1,6 +1,7 @@
 import { 
   Invoice, Expense, Customer, BusinessInfo, AuditLogEntry, 
-  MileageEntry, HomeOfficeDeduction, SalesSettlement, TaxSettings, SyncMetadata 
+  MileageEntry, HomeOfficeDeduction, SalesSettlement, TaxSettings, 
+  SyncMetadata, MergeResolutionResult 
 } from '../types';
 
 const INVOICE_KEY = 'toiminimi_invoices';
@@ -13,6 +14,13 @@ const HOME_OFFICE_KEY = 'toiminimi_home_office';
 const SETTLEMENTS_KEY = 'toiminimi_sales_settlements';
 const TAX_SETTINGS_KEY = 'toiminimi_tax_settings';
 const SYNC_META_KEY = 'toiminimi_sync_meta';
+
+// Helper: Synchronous CustomEvent for real-time header & cross-tab reactivity
+const notifyStorageUpdated = (meta: SyncMetadata) => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('toiminimi-storage-updated', { detail: meta }));
+  }
+};
 
 export const storageService = {
   // --- SYNC METADATA & 2026 LOCAL-FIRST CONFLICT MANAGEMENT ---
@@ -28,7 +36,7 @@ export const storageService = {
       } catch {}
     }
     const newMeta: SyncMetadata = {
-      deviceId: 'flow_' + Math.random().toString(36).substring(2, 10),
+      deviceId: storageService.generateId(),
       lastModifiedAt: new Date().toISOString(),
       dirtyCount: 0,
       schemaVersion: 2
@@ -45,6 +53,7 @@ export const storageService = {
       lastModifiedAt: new Date().toISOString()
     };
     localStorage.setItem(SYNC_META_KEY, JSON.stringify(updated));
+    notifyStorageUpdated(updated);
     return updated;
   },
 
@@ -53,6 +62,7 @@ export const storageService = {
     current.dirtyCount = (current.dirtyCount || 0) + 1;
     current.lastModifiedAt = new Date().toISOString();
     localStorage.setItem(SYNC_META_KEY, JSON.stringify(current));
+    notifyStorageUpdated(current);
   },
 
   recordBackupExported: (): void => {
@@ -60,6 +70,7 @@ export const storageService = {
     current.lastBackupAt = new Date().toISOString();
     current.dirtyCount = 0;
     localStorage.setItem(SYNC_META_KEY, JSON.stringify(current));
+    notifyStorageUpdated(current);
   },
 
   // --- AUDIT LOGS ---
@@ -515,5 +526,236 @@ export const storageService = {
       return isNaN(num) ? max : Math.max(max, num);
     }, 999);
     return (maxNum + 1).toString();
+  },
+
+  // --- RAW WORKING LEDGER STATE (FOR SNAPSHOTS & DIFFS) ---
+  getRawLedgerState: () => {
+    const parse = (key: string, fallback: any) => {
+      const d = localStorage.getItem(key);
+      return d ? JSON.parse(d) : fallback;
+    };
+    return {
+      invoices: parse(INVOICE_KEY, []) as Invoice[],
+      expenses: parse(EXPENSE_KEY, []) as Expense[],
+      salesSettlements: parse(SETTLEMENTS_KEY, []) as SalesSettlement[],
+      mileageEntries: parse(MILEAGE_KEY, []) as MileageEntry[],
+      homeOffice: parse(HOME_OFFICE_KEY, {}) as Record<number, HomeOfficeDeduction>,
+      taxSettings: storageService.getTaxSettings(),
+      customers: parse(CUSTOMER_KEY, []) as Customer[],
+      businessInfo: storageService.getBusinessInfo(),
+      auditLogs: parse(AUDIT_LOG_KEY, []) as AuditLogEntry[],
+      syncMeta: storageService.getSyncMetadata()
+    };
+  },
+
+  // --- SMART MULTI-DEVICE / MULTI-PC MERGE (BY UUID + UPDATEDAT) ---
+  smartMergeLedgerData: (incomingJson: string): MergeResolutionResult => {
+    try {
+      const incoming = JSON.parse(incomingJson);
+      if (!incoming || typeof incoming !== 'object') {
+        throw new Error('Invalid JSON data');
+      }
+
+      let addedCount = 0;
+      let updatedCount = 0;
+      let skippedCount = 0;
+      const details: string[] = [];
+
+      // Generic entity merger for collections with { id, createdAt, updatedAt, deletedAt }
+      const mergeEntities = <T extends { id: string; createdAt?: string; updatedAt?: string; deletedAt?: string | null }>(
+        localList: T[],
+        incomingList: T[] | undefined,
+        entityLabel: string,
+        getTitle: (item: T) => string
+      ): T[] => {
+        if (!Array.isArray(incomingList)) return localList;
+        const localMap = new Map<string, { item: T; index: number }>();
+        localList.forEach((item, index) => localMap.set(item.id, { item, index }));
+
+        const result = [...localList];
+
+        for (const inc of incomingList) {
+          if (!inc || !inc.id) continue;
+          const existing = localMap.get(inc.id);
+
+          if (!existing) {
+            // Item does not exist locally -> add it!
+            result.push(inc);
+            addedCount++;
+            details.push(`Added ${entityLabel} "${getTitle(inc)}"`);
+          } else {
+            // Item exists in both -> compare timestamps
+            const incTime = new Date(inc.updatedAt || inc.createdAt || 0).getTime();
+            const locTime = new Date(existing.item.updatedAt || existing.item.createdAt || 0).getTime();
+
+            if (incTime > locTime) {
+              result[existing.index] = inc;
+              updatedCount++;
+              details.push(`Updated ${entityLabel} "${getTitle(inc)}" (newer from remote)`);
+            } else {
+              skippedCount++;
+            }
+          }
+        }
+        return result;
+      };
+
+      // 1. Invoices
+      const currentInvoices = storageService.getRawInvoices();
+      const mergedInvoices = mergeEntities(
+        currentInvoices,
+        incoming.invoices,
+        'Invoice',
+        (i) => `#${i.invoiceNumber || i.id.slice(0, 6)}`
+      );
+      localStorage.setItem(INVOICE_KEY, JSON.stringify(mergedInvoices));
+
+      // 2. Expenses (with base64 sanitization)
+      const currentExpenses = storageService.getRawExpenses();
+      const sanitizedIncomingExpenses = Array.isArray(incoming.expenses)
+        ? incoming.expenses.map((e: Expense) => ({
+            ...e,
+            receiptUrl: e.receiptUrl?.startsWith('data:') ? 'legacy_receipt.pdf' : e.receiptUrl
+          }))
+        : [];
+      const mergedExpenses = mergeEntities(
+        currentExpenses,
+        sanitizedIncomingExpenses,
+        'Expense',
+        (e) => e.items?.[0]?.description || e.id.slice(0, 6)
+      );
+      localStorage.setItem(EXPENSE_KEY, JSON.stringify(mergedExpenses));
+
+      // 3. Sales Settlements
+      const currentSettlements = storageService.getSalesSettlements();
+      const mergedSettlements = mergeEntities(
+        currentSettlements,
+        incoming.salesSettlements,
+        'Settlement',
+        (s) => `${s.provider} (${s.netAmount} €)`
+      );
+      localStorage.setItem(SETTLEMENTS_KEY, JSON.stringify(mergedSettlements));
+
+      // 4. Mileage Entries
+      const currentMileage = storageService.getMileageEntries();
+      const mergedMileage = mergeEntities(
+        currentMileage,
+        incoming.mileageEntries,
+        'Mileage',
+        (m) => `${m.route} (${m.kilometers} km)`
+      );
+      localStorage.setItem(MILEAGE_KEY, JSON.stringify(mergedMileage));
+
+      // 5. Customers
+      const currentCustomers = storageService.getRawCustomers();
+      const mergedCustomers = mergeEntities(
+        currentCustomers,
+        incoming.customers,
+        'Customer',
+        (c) => c.name || c.id.slice(0, 6)
+      );
+      localStorage.setItem(CUSTOMER_KEY, JSON.stringify(mergedCustomers));
+
+      // 6. Home Office (keyed by year)
+      if (incoming.homeOffice) {
+        const rawHome = localStorage.getItem(HOME_OFFICE_KEY);
+        const localHomeMap: Record<number, HomeOfficeDeduction> = rawHome ? JSON.parse(rawHome) : {};
+        const incomingHome = incoming.homeOffice;
+
+        if (incomingHome.year) {
+          const yr = incomingHome.year;
+          const loc = localHomeMap[yr];
+          if (!loc) {
+            localHomeMap[yr] = incomingHome;
+            addedCount++;
+          } else {
+            const incTime = new Date(incomingHome.updatedAt || 0).getTime();
+            const locTime = new Date(loc.updatedAt || 0).getTime();
+            if (incTime > locTime) {
+              localHomeMap[yr] = incomingHome;
+              updatedCount++;
+            }
+          }
+          localStorage.setItem(HOME_OFFICE_KEY, JSON.stringify(localHomeMap));
+        }
+      }
+
+      // 7. Tax Settings
+      if (incoming.taxSettings) {
+        const localSettings = storageService.getTaxSettings();
+        const incTime = new Date(incoming.taxSettings.updatedAt || 0).getTime();
+        const locTime = new Date(localSettings.updatedAt || 0).getTime();
+        if (incTime > locTime) {
+          storageService.saveTaxSettings(incoming.taxSettings);
+          updatedCount++;
+          details.push('Updated Tax Settings');
+        }
+      }
+
+      // 8. Business Info
+      if (incoming.businessInfo) {
+        const localBiz = storageService.getBusinessInfo();
+        const incTime = new Date(incoming.businessInfo.updatedAt || 0).getTime();
+        const locTime = new Date(localBiz.updatedAt || 0).getTime();
+        if (incTime > locTime) {
+          storageService.saveBusinessInfo(incoming.businessInfo);
+          updatedCount++;
+          details.push('Updated Business Details');
+        }
+      }
+
+      // 9. Audit Logs
+      if (Array.isArray(incoming.auditLogs)) {
+        const localLogs = storageService.getAuditLogs();
+        const logMap = new Set(localLogs.map(l => l.id));
+        for (const log of incoming.auditLogs) {
+          if (!logMap.has(log.id)) {
+            localLogs.push(log);
+          }
+        }
+        localStorage.setItem(AUDIT_LOG_KEY, JSON.stringify(localLogs));
+      }
+
+      const totalMerged = addedCount + updatedCount;
+      if (totalMerged > 0) {
+        storageService.incrementDirtyCount();
+        storageService.addAuditLog('merge', 'tax', 'update', `Smart merge: +${addedCount} added, ~${updatedCount} updated`);
+      }
+
+      return {
+        mergedCount: totalMerged,
+        addedCount,
+        updatedCount,
+        skippedCount,
+        details
+      };
+    } catch (err: any) {
+      console.error('Smart merge error:', err);
+      return {
+        mergedCount: 0,
+        addedCount: 0,
+        updatedCount: 0,
+        skippedCount: 0,
+        details: [`Error: ${err?.message || 'Failed to merge data'}`]
+      };
+    }
+  },
+
+  // --- CLEAR LOCAL DEVICE WORKING DATA (FOR SIGN-OUT ON SHARED PCS) ---
+  clearAllLocalData: (): void => {
+    const keys = [
+      INVOICE_KEY, EXPENSE_KEY, CUSTOMER_KEY, BUSINESS_INFO_KEY,
+      AUDIT_LOG_KEY, MILEAGE_KEY, HOME_OFFICE_KEY, SETTLEMENTS_KEY,
+      TAX_SETTINGS_KEY
+    ];
+    keys.forEach(k => localStorage.removeItem(k));
+    const newMeta: SyncMetadata = {
+      deviceId: storageService.generateId(),
+      lastModifiedAt: new Date().toISOString(),
+      dirtyCount: 0,
+      schemaVersion: 2
+    };
+    localStorage.setItem(SYNC_META_KEY, JSON.stringify(newMeta));
+    notifyStorageUpdated(newMeta);
   }
 };

@@ -168,6 +168,67 @@ export interface SyncMetadata {
   dirtyCount: number;
   schemaVersion: number;
   receiptDirectoryName?: string;
+  headSnapshotId?: string;
+  headShortHash?: string;
+  lastSyncedSnapshotId?: string;
+}
+
+export type SnapshotChangeType = 'added' | 'modified' | 'deleted';
+
+export interface EntityDiffItem {
+  entityType: 'invoice' | 'expense' | 'settlement' | 'mileage' | 'homeOffice' | 'customer' | 'business' | 'taxSettings';
+  changeType: SnapshotChangeType;
+  id: string;
+  title: string;           // e.g. "Invoice #2026-004 (Acme Oy)"
+  subtitle?: string;       // e.g. "1 255,00 € · PAID"
+  amountDelta?: number;    // Gross euro delta if applicable
+}
+
+export interface SnapshotKpiSummary {
+  netTurnover: number;
+  totalExpenses: number;
+  vatPayable: number;
+  safeToWithdraw: number;
+  invoiceCount: number;
+  expenseCount: number;
+}
+
+export interface SnapshotDiffSummary {
+  addedCount: number;
+  modifiedCount: number;
+  deletedCount: number;
+  totalChanges: number;
+  items: EntityDiffItem[];
+  kpiBefore?: SnapshotKpiSummary;
+  kpiAfter?: SnapshotKpiSummary;
+}
+
+export interface LedgerSnapshot {
+  id: string;                // UUIDv4
+  shortHash: string;         // 6-char hex hash (e.g. "7f3a9c")
+  parentSnapshotId?: string; // Previous snapshot ID (for lineage)
+  createdAt: string;         // ISO timestamp
+  note: string;              // User note or auto-generated summary
+  tag: 'manual' | 'auto_safety' | 'milestone' | 'merged' | 'imported';
+  isPinned?: boolean;
+  deviceId: string;
+  schemaVersion: number;
+  kpiSummary: SnapshotKpiSummary;
+  diffSummary: {
+    addedCount: number;
+    modifiedCount: number;
+    deletedCount: number;
+    items: EntityDiffItem[];
+  };
+  payload: string;           // Serialized full ledger JSON state
+}
+
+export interface MergeResolutionResult {
+  mergedCount: number;
+  addedCount: number;
+  updatedCount: number;
+  skippedCount: number;
+  details: string[];
 }
 
 export type IncomeCalculationMode = 'paid_only' | 'all_issued';

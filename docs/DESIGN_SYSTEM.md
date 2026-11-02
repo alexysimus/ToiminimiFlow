@@ -172,6 +172,19 @@ All numerical, temporal, and financial values must adhere to the Finnish nationa
 | **Due Date** | *Eräpäivä* | Last payment date of an invoice |
 | **Payment Terms** | *Maksuehto* | Payment window in days (e.g. 14 pv) |
 | **Payment Slip** | *Tilisiirtolomake* | Standard invoice bottom payment slip |
+
+### C. Clean English-First UI Invariant for Non-Tax Action Controls
+To prevent visual clutter and awkward compound translations:
+1. **Generic Application Mechanics Use Clean English**:
+   - Standard actions, buttons, toolbars, and modal titles use concise, modern English (e.g., `Save Snapshot`, `Version History`, `Compare Changes`, `Restore Snapshot`, `Smart Merge`, `Download Backup`, `Choose File`, `Unsaved Changes`).
+   - Do NOT force Finnish translations onto generic UI controls where English is universally understood by creators and developers.
+2. **Finnish Reserved Strictly for Statutory / Tax Concepts**:
+   - Finnish terminology is preserved where it directly relates to legal, accounting, or governmental compliance (e.g., `OmaVero`, `ALV`, `Form 5 / Lomake 5`, `Line 378`, `Y-tunnus`, `Viitenumero`, `YEL`, `Starttiraha`, `Maksuperusteinen`).
+3. **Dynamic State-Driven Actions (IDE / Git Paradigm)**:
+   - Action buttons like `Save Snapshot` behave dynamically like a modern IDE or Git commit trigger:
+     - **Dirty State (`dirtyCount > 0`)**: Visually prominent, highlighted with change counter (e.g., `Save Snapshot · 3`) and interactive.
+     - **Clean State (`dirtyCount === 0`)**: Calm, non-intrusive status indicator (e.g., `✓ Saved · #7f3a9c`), preventing redundant empty snapshot triggers.
+
 ## 8. Cross-OS Compatibility (iOS, Android, Windows, macOS, Linux)
 
 While Toiminimi Flow embodies Apple HIG elegance, it is engineered for flawless cross-platform performance across all major operating systems:

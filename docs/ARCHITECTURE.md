@@ -268,4 +268,16 @@ To prepare the application for eventual multi-device cloud synchronization (Goog
 - **Dirty Tracking**: `dirtyCount` increments on every create, update, or soft-delete, tracking unsynced mutations and warning users in the Data Backup view when unexported ledger changes exist.
 - **Purge Utility**: `storageService.purgeTombstones()` provides an on-demand maintenance action in Data Backup to permanently clean up deleted records when desired.
 
+### 4. Multi-Device Smart Merge Engine (`storageService.smartMergeLedgerData`)
+When multiple devices (e.g. desktop PC and laptop) create or edit records offline and subsequently sync:
+- Rather than executing naive whole-file overwrites (which erase offline records from the other machine), the Smart Merge engine performs deterministic entity-level merging by UUID across all collections.
+- **New items** added on either device are automatically preserved in the union set.
+- **Concurrent edits** to the same record resolve via timestamp arbitration (`updatedAt`), taking the newer revision while preserving the pre-merge state in Version History.
+- **Deletions** are respected via `deletedAt` tombstones, preventing deleted records from resurrecting when an older device syncs.
+
+### 5. Real-Time Storage Event Bus (`toiminimi-storage-updated`)
+To eliminate manual polling or stale UI across navigation bars, headers, and tabs:
+- Any mutation (`saveInvoice`, `deleteExpense`, `importAllData`, `smartMergeLedgerData`, `updateSyncMetadata`) dispatches a synchronous `CustomEvent('toiminimi-storage-updated', { detail: SyncMetadata })`.
+- Listeners across the application (such as the global top-right header `Save Snapshot` counter) update instantaneously with `0ms` latency.
+
 
