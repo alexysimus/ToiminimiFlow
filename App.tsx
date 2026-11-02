@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { 
   LayoutDashboard, FileText, Receipt, ShieldCheck, 
   Car, Users, Building2, ChevronLeft, ChevronRight, 
-  Database, ExternalLink, HelpCircle, MoreHorizontal, ArrowUpRight
+  Database, ExternalLink, HelpCircle, MoreHorizontal, ArrowUpRight,
+  Bookmark, Check
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import InvoiceForm from './components/InvoiceForm';
@@ -13,17 +14,34 @@ import CustomerManager from './components/CustomerManager';
 import BusinessInfoForm from './components/BusinessInfoForm';
 import DataBackup from './components/DataBackup';
 import { PrepaymentGuideModal } from './components/PrepaymentGuideModal';
+import { QuickSnapshotModal } from './components/QuickSnapshotModal';
 import { PullToRefresh } from './components/ui/PullToRefresh';
 import { BottomSheet } from './components/ui/BottomSheet';
-import { Tab } from './types';
+import { Tab, SyncMetadata } from './types';
 import { VERO_LINKS } from './services/veroTaxEngine';
+import { storageService } from './services/storageService';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.DASHBOARD);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isPrepaymentGuideOpen, setIsPrepaymentGuideOpen] = useState(false);
+  const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState(false);
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [syncMeta, setSyncMeta] = useState<SyncMetadata>(() => storageService.getSyncMetadata());
+
+  // Listen to synchronous storage event bus for real-time header reactivity (0ms latency)
+  useEffect(() => {
+    const handleStorageUpdated = (e: any) => {
+      if (e.detail) {
+        setSyncMeta(e.detail);
+      } else {
+        setSyncMeta(storageService.getSyncMetadata());
+      }
+    };
+    window.addEventListener('toiminimi-storage-updated', handleStorageUpdated);
+    return () => window.removeEventListener('toiminimi-storage-updated', handleStorageUpdated);
+  }, []);
 
   const handleTabSelect = (tab: Tab) => {
     setActiveTab(tab);
@@ -147,7 +165,12 @@ const App: React.FC = () => {
 
             <DesktopNavItem tab={Tab.CUSTOMERS} icon={Users} label="Customers" />
             <DesktopNavItem tab={Tab.BUSINESS} icon={Building2} label="Business Details" />
-            <DesktopNavItem tab={Tab.BACKUP} icon={Database} label="Backup & Export" />
+            <DesktopNavItem 
+              tab={Tab.BACKUP} 
+              icon={Database} 
+              label="Backup & Export" 
+              badge={syncMeta.dirtyCount > 0 ? `${syncMeta.dirtyCount} unsaved` : undefined} 
+            />
           </nav>
 
           {/* Quick Help & MyTax */}
@@ -202,21 +225,49 @@ const App: React.FC = () => {
           <div className="flex items-center space-x-2 shrink-0">
             <button
               onClick={() => setIsPrepaymentGuideOpen(true)}
-              className="px-3 py-2 text-xs font-semibold text-slate-700 hover:text-[#003580] hover:bg-slate-100 rounded-xl transition flex items-center space-x-1.5 min-h-[40px]"
+              className="px-2.5 sm:px-3 py-2 text-xs font-semibold text-slate-700 hover:text-[#003580] hover:bg-slate-100 rounded-xl transition flex items-center space-x-1.5 min-h-[40px]"
+              title="Open Beginner's Tax Guide"
             >
               <HelpCircle size={16} className="text-[#003580]" />
               <span className="hidden sm:inline">Tax Guide</span>
             </button>
 
-            <a
-              href={VERO_LINKS.OMAVERO}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3.5 py-2 bg-[#003580] hover:bg-[#002868] text-white text-xs font-semibold rounded-xl shadow-2xs transition flex items-center space-x-1.5 min-h-[40px]"
+            {/* Global Quick Snapshot Pill Trigger (IDE / Git Commit Paradigm) */}
+            {syncMeta.dirtyCount > 0 ? (
+              <button
+                onClick={() => setIsSnapshotModalOpen(true)}
+                className="px-3 sm:px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-xs font-semibold rounded-xl shadow-xs transition-all duration-200 flex items-center space-x-1.5 min-h-[40px]"
+                title={`${syncMeta.dirtyCount} unsaved change(s). Click to save a snapshot checkpoint.`}
+              >
+                <Bookmark size={15} className="shrink-0" />
+                <span className="hidden sm:inline">Save Snapshot</span>
+                <span className="sm:hidden">Save</span>
+                <span className="px-1.5 py-0.5 rounded-full bg-black/20 text-[11px] font-bold">
+                  {syncMeta.dirtyCount}
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsSnapshotModalOpen(true)}
+                className="px-2.5 sm:px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 min-h-[40px]"
+                title="All changes saved. Click to inspect snapshot or version history."
+              >
+                <Check size={14} className="text-emerald-600 shrink-0" />
+                <span className="hidden sm:inline">Saved</span>
+                {syncMeta.headShortHash ? (
+                  <span className="font-mono text-slate-500 text-[11px]">#{syncMeta.headShortHash}</span>
+                ) : null}
+              </button>
+            )}
+
+            {/* Future Tier 2 Auth / Cloud Sync Reserved Slot */}
+            <div 
+              className="hidden lg:flex items-center text-slate-400 pl-2 border-l border-slate-200 text-xs" 
+              title="Tier 1 Local Mode active"
             >
-              <span>MyTax</span>
-              <ArrowUpRight size={14} />
-            </a>
+              <span className="w-2 h-2 rounded-full bg-slate-300 mr-1.5"></span>
+              <span className="font-medium text-[11px] text-slate-500">Local</span>
+            </div>
           </div>
         </header>
 
@@ -369,6 +420,13 @@ const App: React.FC = () => {
         isOpen={isPrepaymentGuideOpen}
         onClose={() => setIsPrepaymentGuideOpen(false)}
         currentTaxRate={13.0}
+      />
+
+      {/* Global Quick Snapshot Modal (Git-Like Restore Checkpoints) */}
+      <QuickSnapshotModal
+        isOpen={isSnapshotModalOpen}
+        onClose={() => setIsSnapshotModalOpen(false)}
+        onNavigateToHistory={() => handleTabSelect(Tab.BACKUP)}
       />
     </div>
   );

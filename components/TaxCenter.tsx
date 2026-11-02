@@ -157,6 +157,17 @@ export const TaxCenter: React.FC = () => {
             <FileSpreadsheet size={16} />
             <span>Form 5 Helper</span>
           </button>
+
+          <a
+            href={VERO_LINKS.OMAVERO}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2.5 bg-[#EDF4FC] hover:bg-blue-100/80 active:scale-[0.98] text-[#003580] text-xs font-semibold rounded-xl border border-blue-200/80 transition flex items-center justify-center space-x-1.5 min-h-[44px] shadow-2xs"
+            title="Open official Finnish Tax Administration MyTax portal"
+          >
+            <span>Open MyTax (OmaVero)</span>
+            <ArrowUpRight size={14} />
+          </a>
         </div>
       </div>
 
