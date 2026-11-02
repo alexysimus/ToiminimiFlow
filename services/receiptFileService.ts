@@ -134,16 +134,16 @@ export const receiptFileService = {
   /**
    * Retrieve the linked FileSystemDirectoryHandle with permission check
    */
-  getReceiptDirectoryHandle: async (): Promise<any | null> => {
+  getReceiptDirectoryHandle: async (mode: 'read' | 'readwrite' = 'read'): Promise<any | null> => {
     try {
       const handle = await idbGet<any>(DIR_HANDLE_KEY);
       if (!handle) return null;
 
       // Query permission or request permission if needed
       if (typeof handle.queryPermission === 'function') {
-        let perm = await handle.queryPermission({ mode: 'read' });
+        let perm = await handle.queryPermission({ mode });
         if (perm === 'prompt') {
-          perm = await handle.requestPermission({ mode: 'read' });
+          perm = await handle.requestPermission({ mode });
         }
         if (perm !== 'granted') return null;
       }
@@ -177,6 +177,45 @@ export const receiptFileService = {
       storageService.updateSyncMetadata({ receiptDirectoryName: undefined });
     } catch (e) {
       console.warn('Error unlinking directory:', e);
+    }
+  },
+
+  /**
+   * Write backup JSON directly to the linked local directory (e.g. Google Drive/OneDrive folder)
+   */
+  writeBackupToDirectory: async (fileName: string, content: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const dirHandle = await receiptFileService.getReceiptDirectoryHandle('readwrite');
+      if (!dirHandle) {
+        return { success: false, error: 'NO_DIRECTORY_OR_PERMISSION' };
+      }
+      const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(content);
+      await writable.close();
+      return { success: true };
+    } catch (err: any) {
+      console.warn('Failed to write backup to directory:', err);
+      return { success: false, error: err.message || 'WRITE_FAILED' };
+    }
+  },
+
+  /**
+   * Read backup JSON directly from the linked local directory
+   */
+  readBackupFromDirectory: async (fileName: string): Promise<{ success: boolean; content?: string; error?: string }> => {
+    try {
+      const dirHandle = await receiptFileService.getReceiptDirectoryHandle('read');
+      if (!dirHandle) {
+        return { success: false, error: 'NO_DIRECTORY_OR_PERMISSION' };
+      }
+      const fileHandle = await dirHandle.getFileHandle(fileName);
+      const file = await fileHandle.getFile();
+      const content = await file.text();
+      return { success: true, content };
+    } catch (err: any) {
+      console.warn('Failed to read backup from directory:', err);
+      return { success: false, error: err.message || 'READ_FAILED' };
     }
   },
 
