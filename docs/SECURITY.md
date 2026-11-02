@@ -10,6 +10,7 @@ Because Toiminimi Flow manages business invoicing, client databases, and tax dat
 1. **Client-Side Data Ownership**: In Tier 1 (Guest Mode), no financial data, invoice details, client names, or profit numbers are ever sent to an external server. Everything is stored locally in the user's browser.
 2. **No Data Mining or Tracking**: Zero analytics trackers, zero advertisement SDKs, and zero telemetry.
 3. **Bring Your Own Cloud (BYOC)**: Any optional cloud synchronization (Google Drive / iCloud) operates strictly within user-owned personal storage spaces without third-party data collection.
+4. **Local Snapshot & History Privacy**: Version history checkpoints, diff summaries, and ledger snapshots reside in client-side IndexedDB (`toiminimi_snapshots_db`). Restoring, comparing, or inspecting snapshots happens entirely in-memory with zero network calls.
 
 ---
 

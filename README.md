@@ -102,10 +102,13 @@ Toiminimi Flow is designed with a strict **privacy-first, zero-knowledge** philo
 - **Progressive Web App (PWA) Offline Architecture**:
   - Installable on iOS (Safari Home Screen), Android (Chrome), Windows, and macOS.
   - Service worker caching (`public/sw.js`) guarantees 100% offline functionality without internet connectivity.
-- **Sync-Ready Data Backup & Audit Trail (Schema v2)**:
-  - Export and restore complete Schema v2 JSON backups with cryptographic `deviceId`, soft-delete tombstones (`deletedAt`), and unbacked change tracking (`dirtyCount`).
-  - Connect and manage your local receipts folder directly from the browser via IndexedDB handles.
-  - Append-only audit trail logging all invoice and expense creations, updates, and deletions.
+- **Git-Like Ledger Snapshot, Version History & Multi-Device Smart Merge**:
+  - **Global Header Quick-Save Trigger**: Dynamic header pill displays unsaved mutations counter (`Save Snapshot · 3`) and switches to a calm status (`✓ Saved · #7f3a9c`) when clean.
+  - **Git-Like Immutable Checkpoints**: Snapshots are saved to an isolated IndexedDB store (`toiminimi_snapshots_db`) using 0 bytes of `localStorage` quota.
+  - **Deterministic Diff Engine**: Line-by-line visual inspector showing exact additions (`+`), modifications (`~`), and deletions (`-`) across invoices, expenses, travel records, and business settings with financial KPI deltas.
+  - **Multi-Device Smart Merge Engine**: Seamlessly combine changes across multiple PCs/laptops (e.g. desktop at office and laptop at home) using UUID matching and timestamp resolution with zero lost edits.
+  - **Auto-Safety Restores**: Generates an automatic safety snapshot prior to restoring older checkpoints or importing backup files so no work is ever lost.
+  - **Zero-Storage Local Folder Sync**: Connect a local folder once via W3C File System Access API to mirror `toiminimi_latest_backup.json` automatically.
 
 ---
 

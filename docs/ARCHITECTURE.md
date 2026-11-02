@@ -280,4 +280,13 @@ To eliminate manual polling or stale UI across navigation bars, headers, and tab
 - Any mutation (`saveInvoice`, `deleteExpense`, `importAllData`, `smartMergeLedgerData`, `updateSyncMetadata`) dispatches a synchronous `CustomEvent('toiminimi-storage-updated', { detail: SyncMetadata })`.
 - Listeners across the application (such as the global top-right header `Save Snapshot` counter) update instantaneously with `0ms` latency.
 
+### 6. Git-Like Ledger Snapshots & Version History Engine (`services/snapshotService.ts`)
+To allow sole traders to inspect past states, compare modifications, and recover from accidental mistakes or bad imports:
+- **IndexedDB Isolation (`toiminimi_snapshots_db`)**: Snapshots are saved to an isolated object store in IndexedDB. This avoids consuming `localStorage` quota, allowing users to save dozens of historical snapshots without hitting quota barriers.
+- **6-Character Hex Hashes**: Every snapshot receives a deterministic short hash (e.g. `#7f3a9c`) resembling a git commit identifier.
+- **Deterministic Diff Engine**: Computes exact entity-level differences (`+ added`, `~ modified`, `- deleted`) and financial KPI deltas between any two snapshots or between the working ledger and the latest snapshot (`HEAD`).
+- **Milestone Pinning (`isPinned`)**: Users can pin milestones (e.g., "VAT Return Filed Q3", "Annual Books Closed 2026") to protect critical historical checkpoints from automated pruning.
+- **Auto-Safety Snapshot Guardrail**: Before any `restoreSnapshot()`, `smartMergeLedgerData()`, or raw file overwrite, an automatic safety snapshot (`tag: 'auto_safety'`) is generated synchronously. If a user accidentally restores an old snapshot, their current working state is instantly recoverable from the timeline.
+- **Folder Sync Automation**: When a local receipt directory is connected via File System Access API, snapshots can automatically write a mirrored `toiminimi_latest_backup.json` to that folder, enabling cross-computer synchronization via Google Drive, OneDrive, or iCloud folders.
+
 
