@@ -7,10 +7,10 @@ import {
   Copy, Trash2, Search, Eye, X, Download, Calendar, 
   CreditCard, Tag, ArrowRight, ExternalLink, Edit3, CheckCircle2, 
   Circle, Clock, History, Plus, ShieldCheck, HelpCircle, ArrowUpRight,
-  ChevronRight, Check
+  ChevronRight, Check, Info
 } from 'lucide-react';
 import { storageService } from '../services/storageService';
-import { veroTaxEngine } from '../services/veroTaxEngine';
+import { veroTaxEngine, VERO_CONSTANTS, VERO_LINKS } from '../services/veroTaxEngine';
 import { generateInvoicePDF } from '../services/pdfService';
 import { PrepaymentGuideModal } from './PrepaymentGuideModal';
 import { SalesSettlementModal } from './SalesSettlementModal';
@@ -20,10 +20,9 @@ import {
   formatFinnishCurrency, formatFinnishDate, formatFinnishPercent, formatFinnishNumber, formatFinnishIban, formatFinnishReference 
 } from '../services/formatUtils';
 import { 
-  Invoice, Expense, SalesSettlement, Tab, AuditLogEntry, TaxSettings 
+  Invoice, Expense, SalesSettlement, Tab, AuditLogEntry, TaxSettings, IncomeCalculationMode 
 } from '../types';
 import { calendarService } from '../services/calendarService';
-import { VERO_LINKS } from '../services/veroTaxEngine';
 
 interface DashboardProps {
   onNavigate: (tab: Tab) => void;
@@ -37,6 +36,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   
   // Controls & Toggles
   const [vatViewMode, setVatViewMode] = useState<'vat_0' | 'vat_incl'>('vat_0');
+  const [incomeMode, setIncomeMode] = useState<IncomeCalculationMode>(taxSettings.incomeMode || 'all_issued');
+  const [isCalculationBreakdownOpen, setIsCalculationBreakdownOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'invoices' | 'expenses' | 'settlements'>('invoices');
   const [search, setSearch] = useState('');
   const [invoiceFilter, setInvoiceFilter] = useState<'all' | 'unpaid' | 'paid'>('all');
@@ -76,7 +77,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     setInvoices(storageService.getInvoices());
     setExpenses(storageService.getExpenses());
     setSettlements(storageService.getSalesSettlements());
-    setTaxSettings(storageService.getTaxSettings());
+    const settings = storageService.getTaxSettings();
+    setTaxSettings(settings);
+    if (settings.incomeMode && settings.incomeMode !== incomeMode) {
+      setIncomeMode(settings.incomeMode);
+    }
+  };
+
+  const handleIncomeModeChange = (mode: IncomeCalculationMode) => {
+    setIncomeMode(mode);
+    const updated = { ...taxSettings, incomeMode: mode };
+    storageService.saveTaxSettings(updated);
+    setTaxSettings(updated);
   };
 
   useEffect(() => {
@@ -85,91 +97,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     }
   }, [selectedItem]);
 
-  // Income calculations
-  let invoiceNet = 0;
-  let invoiceGross = 0;
-  invoices.forEach(inv => {
-    inv.items.forEach(i => {
-      const gross = i.quantity * i.unitPrice;
-      const vatRate = i.vatRate || 0;
-      const net = vatRate > 0 ? gross / (1 + (vatRate / 100)) : gross;
-      invoiceGross += gross;
-      invoiceNet += net;
-    });
-  });
-
-  let settlementNet = 0;
-  let settlementGross = 0;
-  let settlementFees = 0;
-  settlements.forEach(s => {
-    const vatRate = s.vatRate || 0;
-    const net = vatRate > 0 ? s.grossAmount / (1 + (vatRate / 100)) : s.grossAmount;
-    settlementGross += s.grossAmount;
-    settlementNet += net;
-    settlementFees += s.feeAmount;
-  });
-
-  const totalGrossIncome = invoiceGross + settlementGross;
-  const totalNetIncome = invoiceNet + settlementNet;
-  const displayedIncome = vatViewMode === 'vat_0' ? totalNetIncome : totalGrossIncome;
-
-  // Expense calculations
-  let expenseNet = 0;
-  let expenseGross = 0;
-  expenses.forEach(exp => {
-    exp.items.forEach(i => {
-      const vatRate = i.vatRate || 0;
-      const gross = i.amount;
-      const net = vatRate > 0 ? gross / (1 + (vatRate / 100)) : gross;
-      expenseGross += gross;
-      expenseNet += net;
-    });
-  });
-
-  const displayedExpense = vatViewMode === 'vat_0' ? expenseNet : expenseGross;
-
-  // VAT calculations
-  let vatCollected = 0;
-  invoices.forEach(inv => {
-    inv.items.forEach(i => {
-      const gross = i.quantity * i.unitPrice;
-      const vatRate = i.vatRate || 0;
-      if (vatRate > 0) vatCollected += gross - (gross / (1 + (vatRate / 100)));
-    });
-  });
-  settlements.forEach(s => {
-    const vatRate = s.vatRate || 0;
-    if (vatRate > 0) vatCollected += s.grossAmount - (s.grossAmount / (1 + (vatRate / 100)));
-  });
-
-  let vatPaidOnPurchases = 0;
-  expenses.forEach(exp => {
-    exp.items.forEach(i => {
-      const vatRate = i.vatRate || 0;
-      if (vatRate > 0) vatPaidOnPurchases += i.amount - (i.amount / (1 + (vatRate / 100)));
-    });
-  });
-
-  const vatPayable = Math.max(0, vatCollected - vatPaidOnPurchases);
-
-  // Real-time Vero Tax Safe Engine
+  // Real-time Finnish Vero Tax & Accounting Engine 2026
+  const currentYear = taxSettings.financialYear || 2026;
   const mileageEntries = storageService.getMileageEntries();
-  const homeOffice = storageService.getHomeOfficeDeduction(taxSettings.financialYear || 2026);
+  const homeOffice = storageService.getHomeOfficeDeduction(currentYear);
 
-  const taxSafe = veroTaxEngine.calculateTaxSafe(
-    totalGrossIncome,
-    totalNetIncome,
-    expenseGross,
-    vatPayable,
-    taxSettings.personalTaxRate
+  const ledgerSummary = veroTaxEngine.calculateLedgerSummary(
+    invoices,
+    expenses,
+    settlements,
+    mileageEntries,
+    homeOffice,
+    taxSettings,
+    incomeMode,
+    currentYear
   );
 
-  const currentYear = taxSettings.financialYear || 2026;
+  const displayedIncome = vatViewMode === 'vat_0' ? ledgerSummary.totalNetIncome : ledgerSummary.totalGrossIncome;
+  const displayedExpense = vatViewMode === 'vat_0' ? ledgerSummary.totalDirectExpensesNet : ledgerSummary.totalExpensesGross;
+
   const deadlines = veroTaxEngine.generateDeadlines(
     taxSettings,
     currentYear,
-    vatPayable,
-    taxSafe.estimatedPrepaymentTax
+    ledgerSummary.vatPayable,
+    ledgerSummary.estimatedIncomeTax
   );
 
   const upcomingDeadlines = deadlines.filter(d => veroTaxEngine.getDaysRemaining(d.dueDate) >= 0);
@@ -181,7 +132,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   // Quick Actions Handlers
   const handleTogglePaid = (e: React.MouseEvent, inv: Invoice) => {
     e.stopPropagation();
-    const updatedInvoice = { ...inv, isPaid: !inv.isPaid };
+    const isNowPaid = !inv.isPaid;
+    const updatedInvoice: Invoice = { 
+      ...inv, 
+      isPaid: isNowPaid,
+      paidDate: isNowPaid ? (inv.paidDate || new Date().toISOString().split('T')[0]) : undefined
+    };
     storageService.saveInvoice(updatedInvoice);
     refreshData();
     if (selectedItem?.item.id === inv.id) {
@@ -373,38 +329,83 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
       {/* 3. THE TOIMINIMI TAX SAFE (Apple HIG Metric Cards with Tabular Numerals) */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-6 shadow-xs space-y-4 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div className="min-w-0">
             <span className="text-[10px] font-bold text-[#003580] uppercase tracking-wider block">
-              Tax Year 1 Jan 2026 – 31 Dec 2026
+              Tax Year 1 Jan 2026 – 31 Dec 2026 · Finnish Vero Statutes
             </span>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">The Sole Trader Tax Safe (Tax Reserve)</h2>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">The Sole Trader Tax Safe (Verosuoja)</h2>
           </div>
 
-          {/* Interactive VAT Toggle (44px min touch target) */}
-          <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl self-stretch sm:self-auto justify-center">
-            <button
-              onClick={() => setVatViewMode('vat_0')}
-              className={`flex-1 sm:flex-initial px-3 py-1.5 text-xs font-semibold rounded-lg transition min-h-[36px] flex items-center justify-center ${
-                vatViewMode === 'vat_0'
-                  ? 'bg-white text-[#003580] shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              VAT 0% (Net)
-            </button>
-            <button
-              onClick={() => setVatViewMode('vat_incl')}
-              className={`flex-1 sm:flex-initial px-3 py-1.5 text-xs font-semibold rounded-lg transition min-h-[36px] flex items-center justify-center ${
-                vatViewMode === 'vat_incl'
-                  ? 'bg-white text-[#003580] shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Incl. VAT (Gross)
-            </button>
+          {/* Mode Controls: VAT & Accounting Inflows */}
+          <div className="flex flex-wrap items-center gap-2 self-stretch lg:self-auto">
+            {/* Income Calculation Mode Toggle (Cash vs Accrual) */}
+            <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl flex-1 sm:flex-initial justify-center" title="Finnish Accounting Act: Single-entry sole traders can recognize revenue upon receipt in bank (maksuperusteinen) or upon invoice issuance (suoriteperusteinen)">
+              <button
+                onClick={() => handleIncomeModeChange('all_issued')}
+                className={`flex-1 sm:flex-initial px-3 py-1.5 text-xs font-semibold rounded-lg transition min-h-[36px] flex items-center justify-center space-x-1 ${
+                  incomeMode === 'all_issued'
+                    ? 'bg-white text-[#003580] shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <span>All Invoiced</span>
+              </button>
+              <button
+                onClick={() => handleIncomeModeChange('paid_only')}
+                className={`flex-1 sm:flex-initial px-3 py-1.5 text-xs font-semibold rounded-lg transition min-h-[36px] flex items-center justify-center space-x-1 ${
+                  incomeMode === 'paid_only'
+                    ? 'bg-white text-[#003580] shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <span>Paid Only (Cash)</span>
+              </button>
+            </div>
+
+            {/* Interactive VAT Toggle (44px min touch target) */}
+            <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl flex-1 sm:flex-initial justify-center">
+              <button
+                onClick={() => setVatViewMode('vat_0')}
+                className={`flex-1 sm:flex-initial px-3 py-1.5 text-xs font-semibold rounded-lg transition min-h-[36px] flex items-center justify-center ${
+                  vatViewMode === 'vat_0'
+                    ? 'bg-white text-[#003580] shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                VAT 0% (Net)
+              </button>
+              <button
+                onClick={() => setVatViewMode('vat_incl')}
+                className={`flex-1 sm:flex-initial px-3 py-1.5 text-xs font-semibold rounded-lg transition min-h-[36px] flex items-center justify-center ${
+                  vatViewMode === 'vat_incl'
+                    ? 'bg-white text-[#003580] shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Incl. VAT (Gross)
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Cash-basis pending receipt advisory */}
+        {incomeMode === 'paid_only' && ledgerSummary.unpaidInvoicesCount > 0 && (
+          <div className="px-3.5 py-2.5 bg-amber-50/80 border border-amber-200/80 rounded-xl text-xs text-amber-900 flex items-center justify-between gap-2">
+            <div className="flex items-center space-x-2 min-w-0">
+              <Clock size={15} className="text-amber-700 shrink-0" />
+              <span className="truncate">
+                Cash-basis active: <strong>{ledgerSummary.unpaidInvoicesCount} unpaid invoice(s)</strong> ({formatFinnishCurrency(ledgerSummary.unpaidGrossAmount)}) are excluded until payment is received.
+              </span>
+            </div>
+            <button
+              onClick={() => handleIncomeModeChange('all_issued')}
+              className="text-xs font-semibold text-amber-800 hover:underline shrink-0"
+            >
+              Count all
+            </button>
+          </div>
+        )}
 
         {/* Mobile Metric Swipeable Carousel (Visible on <640px) */}
         <div className="sm:hidden space-y-2">
@@ -422,14 +423,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 {formatFinnishCurrency(displayedIncome)}
               </div>
               <p className="text-xs text-slate-500">
-                {invoices.length} invoices · {settlements.length} settlements
+                {incomeMode === 'paid_only' 
+                  ? `${ledgerSummary.paidInvoicesCount} paid invoices · ${ledgerSummary.settlementsCount} settlements`
+                  : `${invoices.length} invoices · ${ledgerSummary.settlementsCount} settlements`}
               </p>
             </div>
 
             {/* Card 2: Total Expenses */}
             <div className="w-[82vw] shrink-0 snap-center p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-1.5 shadow-2xs">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block truncate">
-                Expenses ({vatViewMode === 'vat_0' ? 'VAT 0%' : 'Incl. VAT'})
+                Direct Expenses ({vatViewMode === 'vat_0' ? 'VAT 0%' : 'Incl. VAT'})
               </span>
               <div className="text-2xl font-bold font-mono tabular-nums text-slate-900 tracking-tight">
                 {formatFinnishCurrency(displayedExpense)}
@@ -445,10 +448,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 Operating Profit (Result)
               </span>
               <div className="text-2xl font-bold font-mono tabular-nums text-[#003580] tracking-tight">
-                {formatFinnishCurrency(taxSafe.netProfit)}
+                {formatFinnishCurrency(ledgerSummary.operatingProfitNet)}
               </div>
               <p className="text-xs text-slate-600">
-                Taxable: {formatFinnishCurrency(taxSafe.taxableProfit)}
+                Taxable: {formatFinnishCurrency(ledgerSummary.taxableBusinessIncome)}
               </p>
             </div>
 
@@ -461,7 +464,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0 ml-1"></span>
               </div>
               <div className="text-2xl font-bold font-mono tabular-nums text-emerald-700 tracking-tight">
-                {formatFinnishCurrency(taxSafe.safeToWithdraw)}
+                {formatFinnishCurrency(ledgerSummary.safeToWithdraw)}
               </div>
               <p className="text-xs text-emerald-800 font-medium">
                 100% safe for personal drawings
@@ -497,14 +500,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               {formatFinnishCurrency(displayedIncome)}
             </div>
             <p className="text-xs text-slate-500 truncate">
-              {invoices.length} invoices · {settlements.length} settlements
+              {incomeMode === 'paid_only' 
+                ? `${ledgerSummary.paidInvoicesCount} paid invoices · ${ledgerSummary.settlementsCount} settlements`
+                : `${invoices.length} invoices · ${ledgerSummary.settlementsCount} settlements`}
             </p>
           </div>
 
           {/* Card 2: Total Expenses */}
           <div className="p-4 bg-slate-50/70 border border-slate-200/70 rounded-2xl space-y-1.5 min-w-0">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block truncate">
-              Expenses ({vatViewMode === 'vat_0' ? 'VAT 0%' : 'Incl. VAT'})
+              Direct Expenses ({vatViewMode === 'vat_0' ? 'VAT 0%' : 'Incl. VAT'})
             </span>
             <div className="text-2xl xl:text-3xl font-bold font-mono tabular-nums text-slate-900 tracking-tight truncate">
               {formatFinnishCurrency(displayedExpense)}
@@ -520,10 +525,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               Operating Profit (Result)
             </span>
             <div className="text-2xl xl:text-3xl font-bold font-mono tabular-nums text-[#003580] tracking-tight truncate">
-              {formatFinnishCurrency(taxSafe.netProfit)}
+              {formatFinnishCurrency(ledgerSummary.operatingProfitNet)}
             </div>
             <p className="text-xs text-slate-600 truncate">
-              Taxable: {formatFinnishCurrency(taxSafe.taxableProfit)}
+              Taxable: {formatFinnishCurrency(ledgerSummary.taxableBusinessIncome)}
             </p>
           </div>
 
@@ -536,7 +541,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0 ml-1"></span>
             </div>
             <div className="text-2xl xl:text-3xl font-bold font-mono tabular-nums text-emerald-700 tracking-tight truncate">
-              {formatFinnishCurrency(taxSafe.safeToWithdraw)}
+              {formatFinnishCurrency(ledgerSummary.safeToWithdraw)}
             </div>
             <p className="text-xs text-emerald-800 font-medium truncate">
               100% safe for personal drawings
@@ -554,29 +559,122 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               </span>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Total tax buffer to retain for Tax Administration: <strong className="font-mono tabular-nums text-white text-sm whitespace-nowrap">{formatFinnishCurrency(taxSafe.totalTaxReserve)}</strong>
-              <span className="hidden sm:inline text-slate-400"> (VAT: {formatFinnishCurrency(vatPayable)} · Prepayment Tax: {formatFinnishCurrency(taxSafe.estimatedPrepaymentTax)})</span>
+              Total tax buffer to retain for Tax Administration: <strong className="font-mono tabular-nums text-white text-sm whitespace-nowrap">{formatFinnishCurrency(ledgerSummary.totalTaxReserve)}</strong>
+              <span className="hidden sm:inline text-slate-400"> (VAT: {formatFinnishCurrency(ledgerSummary.vatPayable)} · Prepayment Tax: {formatFinnishCurrency(ledgerSummary.estimatedIncomeTax)})</span>
             </p>
           </div>
 
-          <div className="flex items-center space-x-2 shrink-0">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0">
+            <button
+              onClick={() => setIsCalculationBreakdownOpen(!isCalculationBreakdownOpen)}
+              className="flex-1 sm:flex-initial px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center space-x-1.5 min-h-[40px]"
+            >
+              <Info size={14} />
+              <span>{isCalculationBreakdownOpen ? 'Hide Math' : 'How is this calculated?'}</span>
+            </button>
+
             <button
               onClick={() => setIsPrepaymentGuideOpen(true)}
-              className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl transition flex items-center space-x-1.5 min-h-[40px]"
+              className="flex-1 sm:flex-initial px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center space-x-1.5 min-h-[40px]"
             >
               <HelpCircle size={14} />
-              <span>Prepayment Tax Guide</span>
+              <span>Prepayment Guide</span>
             </button>
 
             <button
               onClick={() => onNavigate(Tab.TAXES)}
-              className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl transition flex items-center space-x-1 min-h-[40px]"
+              className="w-full sm:w-auto px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center space-x-1 min-h-[40px]"
             >
-              <span>All Deadlines</span>
+              <span>Tax Deadlines</span>
               <ArrowRight size={13} />
             </button>
           </div>
         </div>
+
+        {/* Step-by-Step Mathematical Transparency Breakdown */}
+        {isCalculationBreakdownOpen && (
+          <div className="p-4 sm:p-5 bg-slate-50/90 rounded-2xl border border-slate-200/80 space-y-4 animate-fadeIn text-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-200/80 gap-1">
+              <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px] flex items-center space-x-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#003580]"></span>
+                <span>Vero Tax Safe Engine 2026 · Transparent Calculation Formula</span>
+              </span>
+              <span className="text-[11px] text-slate-500 font-mono">
+                Mode: {incomeMode === 'paid_only' ? 'Cash-basis (Maksuperusteinen)' : 'Accrual (Suoriteperusteinen)'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Step 1: Inflows & Direct Expenses */}
+              <div className="bg-white p-4 rounded-xl border border-slate-200/70 space-y-2.5 shadow-2xs">
+                <span className="font-bold text-slate-900 block text-xs border-b border-slate-100 pb-1">
+                  1. Operating Turnover & Direct Expenses
+                </span>
+                <div className="flex justify-between text-slate-600">
+                  <span>Customer Invoices (ALV 0%):</span>
+                  <span className="font-mono font-bold text-slate-900 tabular-nums">{formatFinnishCurrency(ledgerSummary.invoiceNetTurnover)}</span>
+                </div>
+                <div className="flex justify-between text-slate-600">
+                  <span>Payment Gateway / POS Settlements (ALV 0%):</span>
+                  <span className="font-mono font-bold text-slate-900 tabular-nums">{formatFinnishCurrency(ledgerSummary.settlementNetTurnover)}</span>
+                </div>
+                {ledgerSummary.grantsAndSubsidies > 0 && (
+                  <div className="flex justify-between text-slate-600">
+                    <span>Starttiraha / Business Grants (ALV 0%):</span>
+                    <span className="font-mono font-bold text-slate-900 tabular-nums">{formatFinnishCurrency(ledgerSummary.grantsAndSubsidies)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-rose-600 pt-1.5 border-t border-slate-100">
+                  <span>Materials & Supplies (Line 350):</span>
+                  <span className="font-mono font-bold tabular-nums">- {formatFinnishCurrency(ledgerSummary.materialsSuppliesNet)}</span>
+                </div>
+                <div className="flex justify-between text-rose-600">
+                  <span>Other Operating Expenses & Fees (Line 374):</span>
+                  <span className="font-mono font-bold tabular-nums">- {formatFinnishCurrency(ledgerSummary.operatingExpensesNet)}</span>
+                </div>
+                <div className="flex justify-between text-[#003580] font-bold pt-2 border-t border-slate-200">
+                  <span>Net Operating Result (Liiketulos):</span>
+                  <span className="font-mono text-sm tabular-nums">{formatFinnishCurrency(ledgerSummary.operatingProfitNet)}</span>
+                </div>
+              </div>
+
+              {/* Step 2: Additional Deductions & Tax Buffers */}
+              <div className="bg-white p-4 rounded-xl border border-slate-200/70 space-y-2.5 shadow-2xs">
+                <span className="font-bold text-slate-900 block text-xs border-b border-slate-100 pb-1">
+                  2. Form 5 Deductions, Taxes & Safe Withdrawals
+                </span>
+                <div className="flex justify-between text-emerald-700">
+                  <span>Line 378 (Driver's log {ledgerSummary.mileageKm} km + Home Office):</span>
+                  <span className="font-mono font-bold tabular-nums">- {formatFinnishCurrency(ledgerSummary.totalLisavahennykset)}</span>
+                </div>
+                <div className="flex justify-between text-emerald-700">
+                  <span>Line 380 (Automatic 5% Yrittäjävähennys relief):</span>
+                  <span className="font-mono font-bold tabular-nums">- {formatFinnishCurrency(ledgerSummary.yrittajaVahennys)}</span>
+                </div>
+                <div className="flex justify-between text-slate-800 font-bold pt-1.5 border-t border-slate-100">
+                  <span>Taxable Business Profit (Form 5 base):</span>
+                  <span className="font-mono tabular-nums">{formatFinnishCurrency(ledgerSummary.taxableBusinessIncome)}</span>
+                </div>
+                <div className="flex justify-between text-amber-700">
+                  <span>Estimated Prepayment Tax ({taxSettings.personalTaxRate}%):</span>
+                  <span className="font-mono font-bold tabular-nums">- {formatFinnishCurrency(ledgerSummary.estimatedIncomeTax)}</span>
+                </div>
+                <div className="flex justify-between text-blue-700">
+                  <span>VAT Balance Payable to Vero:</span>
+                  <span className="font-mono font-bold tabular-nums">- {formatFinnishCurrency(ledgerSummary.vatPayable)}</span>
+                </div>
+                <div className="flex justify-between text-emerald-800 font-bold pt-2 border-t border-slate-200 bg-emerald-50/50 p-2 rounded-lg">
+                  <span>Safe to Withdraw (Yksityisotto):</span>
+                  <span className="font-mono text-sm tabular-nums">{formatFinnishCurrency(ledgerSummary.safeToWithdraw)}</span>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-500 leading-relaxed italic">
+              * Note: Safe to withdraw represents your actual gross revenue minus business expenses and mandatory tax reserves (VAT + income tax buffer). Always leave the Tax Safe reserve untouched in your account for tax payments.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* 3. TRANSACTIONS & RECORDS CONTAINER */}

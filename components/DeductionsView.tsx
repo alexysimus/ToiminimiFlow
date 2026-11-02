@@ -357,7 +357,7 @@ export const DeductionsView: React.FC = () => {
                 <span>Finnish Tax Administration Standard Home Office Deductions 2026</span>
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Sole proprietors can claim a statutory formula deduction without itemizing individual electricity, rent, or heating receipts.
+                Sole proprietors can claim a statutory formula deduction on Form 5 Box 378 without itemizing individual electricity, rent, or heating receipts.
               </p>
             </div>
             <a
@@ -369,6 +369,14 @@ export const DeductionsView: React.FC = () => {
               <span>Vero.fi Home Office Guide</span>
               <ExternalLink size={12} />
             </a>
+          </div>
+
+          {/* 2026 Statute Protection Advisory */}
+          <div className="p-3.5 bg-blue-50/70 border border-blue-200/70 rounded-xl flex items-start space-x-2.5 text-xs text-blue-900">
+            <Info size={16} className="text-[#003580] shrink-0 mt-0.5" />
+            <p className="leading-relaxed">
+              <strong>Statute note for 2026:</strong> While the Finnish government abolished the formula home office deduction for wage earners (<em>palkansaajat</em>) as of 1.1.2026, self-employed sole traders (<em>toiminimiyrittäjät / elinkeinonharjoittajat</em>) retain full statutory rights to deduct home office expenses on Business Tax Return <strong>Form 5 (Box 378)</strong>.
+            </p>
           </div>
 
           {/* 3 Tier Cards */}
@@ -451,18 +459,56 @@ export const DeductionsView: React.FC = () => {
       {/* Section 3: YEL */}
       {activeSection === 'yel' && (
         <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-6 md:p-8 shadow-xs space-y-4">
-          <div className="flex items-center space-x-2 pb-2 border-b border-slate-100">
-            <Shield className="text-[#003580]" size={20} />
-            <h3 className="font-bold text-slate-900 text-sm sm:text-base">
-              Self-Employed Person's Pension Insurance (YEL)
-            </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+            <div className="flex items-center space-x-2">
+              <Shield className="text-[#003580]" size={20} />
+              <h3 className="font-bold text-slate-900 text-sm sm:text-base">
+                Self-Employed Person's Pension Insurance (YEL 2026)
+              </h3>
+            </div>
+            <a
+              href={VERO_LINKS.YEL_INSURANCE}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-[#003580] hover:underline font-semibold flex items-center space-x-1 self-start sm:self-auto min-h-[32px]"
+            >
+              <span>Vero.fi YEL Guide</span>
+              <ExternalLink size={12} />
+            </a>
           </div>
-          <div className="space-y-2 text-xs text-slate-600 leading-relaxed">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                Statutory YEL Minimum (2026)
+              </span>
+              <div className="text-xl font-bold font-mono text-slate-900 tabular-nums">
+                {formatFinnishCurrency(VERO_CONSTANTS.YEL_MANDATORY_THRESHOLD)} <span className="text-xs font-normal text-slate-500">/ yr</span>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                ~{formatFinnishCurrency(VERO_CONSTANTS.YEL_MANDATORY_THRESHOLD / 12)} / month confirmed income threshold. Mandatory if active over 4 months.
+              </p>
+            </div>
+
+            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                Unemployment Security Threshold (2026)
+              </span>
+              <div className="text-xl font-bold font-mono text-slate-900 tabular-nums">
+                {formatFinnishCurrency(VERO_CONSTANTS.YEL_UNEMPLOYMENT_THRESHOLD_2026)} <span className="text-xs font-normal text-slate-500">/ yr</span>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                Minimum confirmed work income required to qualify for Yrittäjäkassa and Kela earnings-related unemployment security.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2 text-xs text-slate-600 leading-relaxed pt-1">
             <p>
-              YEL insurance is statutory pension and social security coverage for sole traders in Finland if your confirmed work income exceeds <strong>€9,010.28 per year (2026 threshold)</strong> and your entrepreneurial activity lasts over 4 months.
+              <strong>Contribution rates:</strong> The standard YEL contribution rate is <strong>24.4%</strong> for entrepreneurs aged 18–52 and 63–69 (or <strong>25.9%</strong> for ages 53–62). New entrepreneurs receive a statutory <strong>22% discount</strong> for the first 48 months (bringing the effective rate to ~<strong>19.03%</strong>).
             </p>
             <p>
-              YEL premiums can be deducted either as business expenses on Form 5 (Lomake 5) or on your individual tax return (Form 1A). For most sole traders, deducting them on Form 5 is the most straightforward.
+              <strong>Tax deductibility:</strong> YEL premiums are 100% tax-deductible! You can deduct them directly as business expenses on <strong>Form 5 (Box 374)</strong> if paid from your business account, or on your personal tax return (Form 1A) if paid privately.
             </p>
           </div>
         </div>

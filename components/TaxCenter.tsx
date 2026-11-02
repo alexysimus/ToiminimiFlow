@@ -51,52 +51,21 @@ export const TaxCenter: React.FC = () => {
     setTempRate(settings.personalTaxRate.toString());
   };
 
-  // VAT calculations
-  let vatCollected = 0;
-  invoices.forEach(inv => {
-    inv.items.forEach(item => {
-      const gross = item.quantity * item.unitPrice;
-      const vatRate = item.vatRate || 0;
-      if (vatRate > 0) {
-        const net = gross / (1 + (vatRate / 100));
-        vatCollected += (gross - net);
-      }
-    });
-  });
-
-  settlements.forEach(s => {
-    const vatRate = s.vatRate || 0;
-    if (vatRate > 0) {
-      const net = s.grossAmount / (1 + (vatRate / 100));
-      vatCollected += (s.grossAmount - net);
-    }
-  });
-
-  let vatPaidOnPurchases = 0;
-  expenses.forEach(exp => {
-    exp.items.forEach(item => {
-      const vatRate = item.vatRate !== undefined ? item.vatRate : 0;
-      if (vatRate > 0) {
-        const net = item.amount / (1 + (vatRate / 100));
-        vatPaidOnPurchases += (item.amount - net);
-      }
-    });
-  });
-
-  const vatPayable = Math.max(0, vatCollected - vatPaidOnPurchases);
-
-  // Form 5 calculation
-  const form5: Form5Breakdown = veroTaxEngine.calculateForm5(
+  // Real-time Finnish Vero Tax & Accounting Engine 2026
+  const ledgerSummary = veroTaxEngine.calculateLedgerSummary(
     invoices,
     expenses,
     settlements,
     mileageEntries,
     homeOffice,
+    taxSettings,
+    taxSettings.incomeMode || 'all_issued',
     currentYear
   );
 
-  // Estimated personal prepayment tax
-  const estimatedPrepayment = form5.taxableBusinessIncome * (taxSettings.personalTaxRate / 100);
+  const vatPayable = ledgerSummary.vatPayable;
+  const form5 = ledgerSummary.form5;
+  const estimatedPrepayment = ledgerSummary.estimatedIncomeTax;
 
   // Deadlines
   const deadlines: TaxDeadline[] = veroTaxEngine.generateDeadlines(

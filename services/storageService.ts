@@ -170,12 +170,19 @@ export const storageService = {
   // Tax Settings (Alv-kausi & Ennakkoveroprosentti)
   getTaxSettings: (): TaxSettings => {
     const data = localStorage.getItem(TAX_SETTINGS_KEY);
-    if (data) return JSON.parse(data);
+    if (data) {
+      const parsed: TaxSettings = JSON.parse(data);
+      return {
+        ...parsed,
+        incomeMode: parsed.incomeMode || 'all_issued',
+      };
+    }
     return {
       vatPeriod: 'year', // Standard for small toiminimi under €30k
       personalTaxRate: 13.0, // Default 13.0% as shown in OP screenshot
       prepaymentTaxAssessed: 0,
-      financialYear: 2026
+      financialYear: 2026,
+      incomeMode: 'all_issued'
     };
   },
 

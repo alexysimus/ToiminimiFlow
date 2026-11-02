@@ -108,6 +108,7 @@ export interface TaxSettings {
   personalTaxRate: number; // e.g. 13.0 (%)
   prepaymentTaxAssessed: number; // Annual ennakkovero from Vero decision (eur)
   financialYear: number; // e.g. 2026
+  incomeMode?: IncomeCalculationMode; // 'all_issued' (accrual) or 'paid_only' (cash-basis)
 }
 
 export interface MileageEntry {
@@ -140,6 +141,8 @@ export interface SalesSettlement {
   createdAt: string;
 }
 
+export type IncomeCalculationMode = 'paid_only' | 'all_issued';
+
 export interface Form5Breakdown {
   turnoverNet: number;        // Line 300 (Liikevaihto)
   grantsAndSubsidies: number; // Line 340 (Saadut tuet ja avustukset)
@@ -151,6 +154,64 @@ export interface Form5Breakdown {
   businessResult: number;     // Liiketulos ennen yrittäjävähennystä
   yrittajaVahennys: number;   // Line 380 (5% entrepreneurial deduction)
   taxableBusinessIncome: number; // 95% of positive business result
+}
+
+export interface LedgerSummary2026 {
+  financialYear: number;
+  incomeMode: IncomeCalculationMode;
+  
+  // Turnover & Inflows (Line 300 & Line 340)
+  invoiceNetTurnover: number;
+  settlementNetTurnover: number;
+  turnoverNet: number;              // Line 300 (Liikevaihto ALV 0%)
+  turnoverGross: number;            // Total gross invoice + settlements
+  grantsAndSubsidies: number;       // Line 340 (Saadut tuet - Starttiraha ALV 0%)
+  totalGrossIncome: number;         // Total gross inflows in bank
+  totalNetIncome: number;           // turnoverNet + grantsAndSubsidies
+  
+  // Direct Expenses (Line 350 & Line 374)
+  materialsSuppliesNet: number;     // Line 350 (Aineet ja tarvikkeet ALV 0%)
+  operatingExpensesNet: number;     // Line 374 (Muut kulut + settlement fees ALV 0%)
+  settlementFees: number;           // Card/POS gateway commission fees
+  totalDirectExpensesNet: number;   // Line 350 + Line 374
+  totalExpensesGross: number;       // Total gross expenses (excluding grants)
+  
+  // Additional Deductions (Line 378)
+  mileageDeduction: number;         // Driver's log total deduction
+  mileageKm: number;                // Total kilometers logged
+  homeOfficeDeduction: number;      // Home office tier or actual deduction
+  totalLisavahennykset: number;     // Line 378 total
+  
+  // Profit & Tax Base
+  operatingProfitNet: number;       // totalNetIncome - totalDirectExpensesNet
+  businessResult: number;           // max(0, operatingProfitNet - totalLisavahennykset)
+  yrittajaVahennys: number;         // Line 380 (5% entrepreneurial relief)
+  taxableBusinessIncome: number;    // 95% of positive businessResult
+  
+  // Value Added Tax (ALV-tase)
+  vatCollected: number;             // Suoritettava ALV
+  vatPaidOnPurchases: number;       // Vähennettävä ALV
+  vatBalance: number;               // vatCollected - vatPaidOnPurchases
+  vatPayable: number;               // Payable to Vero (0 if exempt)
+  vatRefundable: number;            // Refundable from Vero (0 if exempt)
+  isVatExempt: boolean;             // True if vatPeriod === 'exempt'
+  
+  // The Toiminimi Tax Safe (Verosuoja) & Cashflow
+  estimatedIncomeTax: number;       // Prepayment tax reserve (Ennakkoverovaraus)
+  totalTaxReserve: number;          // vatPayable + estimatedIncomeTax
+  netCashInBank: number;            // Actual gross money in bank after direct expenses & fees
+  safeToWithdraw: number;           // max(0, netCashInBank - totalTaxReserve)
+  
+  // Metrics & Record Counts
+  invoicesCount: number;
+  paidInvoicesCount: number;
+  unpaidInvoicesCount: number;
+  unpaidGrossAmount: number;
+  expensesCount: number;
+  settlementsCount: number;
+  
+  // Nested Form 5 breakdown
+  form5: Form5Breakdown;
 }
 
 export interface TaxDeadline {
