@@ -144,7 +144,7 @@ flowchart TD
 ```
 
 ### Key Technical Aspects
-1. **Zero-Network Availability**: The service worker intercepts requests for the HTML app shell, Commissioner font stylesheets, and application scripts, serving them immediately from cache.
+1. **Zero-Network Availability**: The service worker intercepts requests for the HTML app shell, Inter variable font binary, and application scripts, serving them immediately from cache.
 2. **Data Resiliency**: All business ledger data is stored in synchronous on-device `localStorage` (`flow_invoices`, `flow_expenses`, `flow_settings`, etc.). An internet outage or dead-zone in Lapland never impedes invoice drafting, mileage logging, or tax reserve calculations.
 3. **Cross-OS Installability**:
    - iOS: "Add to Home Screen" operates with full standalone status bar treatment, safe-area insets (`env(safe-area-inset-top)` / `bottom`), and disabled elastic bounce on root containers.

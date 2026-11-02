@@ -33,23 +33,33 @@ The palette is derived directly from the statutory colors of the **Finnish Flag 
 
 ---
 
-## 3. Typography: Commissioner & JetBrains Mono
+## 3. Typography: Inter & JetBrains Mono
 
-### Primary Typeface: Commissioner
-- **Source**: [Google Fonts (Commissioner)](https://fonts.google.com/specimen/Commissioner)
-- **Role**: All application UI, headings, labels, button text, and body copy.
-- **Why Commissioner**: Designed by Kostas Bartsokas, Commissioner is a low-contrast geometric grotesque with humanist construction. It provides:
-  - **Exceptional Finnish Diacritics**: Perfect vertical proportions and clear dots for Finnish characters (`ä`, `ö`, `å`, `Ä`, `Ö`, `Å`).
-  - **Legibility in Dense Tables**: Clear distinguishability between numbers, uppercase, and punctuation.
-  - **Weights in Use**: 300 (Light), 400 (Regular), 500 (Medium), 600 (SemiBold), 700 (Bold), 800 (ExtraBold).
+### Primary Typeface: Inter (Variable Font)
+- **Local Asset**: `public/fonts/Inter-VariableFont.ttf` (Preloaded & cached offline in PWA service worker)
+- **Fallback / CDN**: [Google Fonts (Inter)](https://fonts.google.com/specimen/Inter)
+- **License**: SIL Open Font License 1.1 (100% open-source safe for public OSS repository)
+- **Role**: All application UI, navigation, buttons, modals, form inputs, headings, and data cards.
+- **Why Inter**: Designed by Rasmus Andersson specifically for computer screens and user interfaces, Inter is one of the world's most legible and refined sans-serif UI typefaces. It provides:
+  - **Tall X-Height & Disambiguation**: Crystal-clear legibility at small sizes (`11px` - `13px`) with unambiguous glyphs for numerals and Latin letters.
+  - **Flawless Finnish Diacritics**: Native, balanced optical diacritic positioning for Finnish letters (`ä`, `ö`, `å`, `Ä`, `Ö`, `Å`).
+  - **Variable Font Flexibility**: Smooth continuous interpolation from 100 (Thin) to 900 (Black) in a single compact 874 KB font binary.
 
 ### Monospace Typeface: JetBrains Mono
 - **Role**: IBAN bank accounts, Finnish reference numbers (*viitenumero*), Y-tunnus, and currency displays.
 - **Key Feature**: Enables `.tabular-nums` so numbers align vertically without layout jitter when sums update.
 
 ```css
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-VariableFont.ttf') format('truetype-variations'),
+       url('/fonts/Inter-VariableFont.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 body {
-  font-family: 'Commissioner', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .font-mono {
@@ -170,7 +180,7 @@ While Toiminimi Flow embodies Apple HIG elegance, it is engineered for flawless 
 | :--- | :--- | :--- |
 | **iOS / iPadOS** | Touch screen, Safari engine (WebKit), notch/Dynamic Island | `min-h-[44px]` touch targets, `.pt-safe`/`.pb-safe` safe area insets, `text-base sm:text-sm` (16px minimum on touch) to prevent Safari viewport auto-zoom on input focus, haptic vibration support, smooth inertia scrolling. |
 | **Android** | Touch screen, Chrome/Blink engine, hardware/gesture back nav | Chrome pull-to-refresh coordination (`touch-action: pan-y`), native PWA installation banner, scroll snap with standard touch resistance, `theme-color: #003580` address bar styling. |
-| **macOS** | Mouse cursor, trackpad pinch/swipe, Retina displays | Discrete hover states (`hover:bg-slate-50`), smooth trackpad scrolling, Commissioner font rendering with subpixel antialiasing (`-webkit-font-smoothing: antialiased`). |
+| **macOS** | Mouse cursor, trackpad pinch/swipe, Retina displays | Discrete hover states (`hover:bg-slate-50`), smooth trackpad scrolling, Inter font rendering with subpixel antialiasing (`-webkit-font-smoothing: antialiased`). |
 | **Windows** | Mouse cursor, high-DPI scaling, standard scrollbars | Custom minimal cross-browser scrollbars, standard keyboard accessibility (`Tab`, `Escape`, `Enter`), no horizontal overflow clipping on narrow windows. |
 | **Linux** | Open-source desktop environments (GNOME, KDE) | System font fallbacks (`-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`), cross-browser CSS variables. |
 

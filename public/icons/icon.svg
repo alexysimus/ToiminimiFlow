@@ -28,6 +28,6 @@
     
     <!-- Flow Euro Badge Center Accent -->
     <circle cx="226" cy="256" r="48" fill="#001D4A" stroke="#FFFFFF" stroke-width="6"/>
-    <text x="226" y="272" font-family="-apple-system, BlinkMacSystemFont, 'Commissioner', sans-serif" font-size="44" font-weight="bold" fill="#FFFFFF" text-anchor="middle">€</text>
+    <text x="226" y="272" font-family="'Inter', -apple-system, BlinkMacSystemFont, sans-serif" font-size="44" font-weight="bold" fill="#FFFFFF" text-anchor="middle">€</text>
   </g>
 </svg>

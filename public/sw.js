@@ -1,11 +1,12 @@
-const CACHE_NAME = 'toiminimi-flow-v1';
+const CACHE_NAME = 'toiminimi-flow-v2';
 
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/index.css',
   '/manifest.json',
-  '/icons/icon.svg'
+  '/icons/icon.svg',
+  '/fonts/Inter-VariableFont.ttf'
 ];
 
 // Install: Cache critical app shell assets

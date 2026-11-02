@@ -44,7 +44,7 @@ Before submitting a Pull Request, please ensure your code follows these project 
 1. **Design System**:
    - Follow the **Apple Human Interface Guidelines (HIG)** layout principles documented in [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md).
    - Use the **Finnish Flag color palette** (`#003580` Siniristi Blue, `#EDF4FC` Ice Blue, `#FFFFFF` Snow White).
-   - Use the **Commissioner** typeface for all UI text and **JetBrains Mono** for tabular numbers/IBANs.
+   - Use the **Inter** variable typeface for all UI text and **JetBrains Mono** for tabular numbers/IBANs.
    - Maintain minimum **44×44px** touch targets on mobile.
 2. **Finnish Statutory Exactness**:
    - Follow **SFS 4175** formatting (`formatUtils.ts`): thousands separated by non-breaking spaces, comma decimal, trailing `€` (e.g. `18 255,00 €`).
