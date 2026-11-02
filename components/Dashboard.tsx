@@ -7,9 +7,10 @@ import {
   Copy, Trash2, Search, Eye, X, Download, Calendar, 
   CreditCard, Tag, ArrowRight, ExternalLink, Edit3, CheckCircle2, 
   Circle, Clock, History, Plus, ShieldCheck, HelpCircle, ArrowUpRight,
-  ChevronRight, Check, Info
+  ChevronRight, Check, Info, FolderOpen
 } from 'lucide-react';
 import { storageService } from '../services/storageService';
+import { receiptFileService } from '../services/receiptFileService';
 import { veroTaxEngine, VERO_CONSTANTS, VERO_LINKS } from '../services/veroTaxEngine';
 import { generateInvoicePDF } from '../services/pdfService';
 import { PrepaymentGuideModal } from './PrepaymentGuideModal';
@@ -50,6 +51,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isCalendarDownloaded, setIsCalendarDownloaded] = useState(false);
   const [isDeadlineBannerDismissed, setIsDeadlineBannerDismissed] = useState(false);
+  const [copiedReceiptPath, setCopiedReceiptPath] = useState(false);
+  const [receiptFeedback, setReceiptFeedback] = useState<string | null>(null);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const carouselRef = React.useRef<HTMLDivElement>(null);
 
@@ -1294,25 +1297,66 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   </div>
 
                   {exp.receiptUrl && (
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Receipt Voucher</span>
-                      {exp.receiptUrl.startsWith('data:') ? (
-                        <img src={exp.receiptUrl} alt="Receipt" className="max-h-48 rounded-xl border border-slate-200 mx-auto object-contain" />
-                      ) : exp.receiptUrl.startsWith('http') ? (
-                        <a
-                          href={exp.receiptUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center space-x-1.5 px-3 py-2 bg-blue-50 text-[#003580] border border-blue-200 rounded-xl text-xs font-semibold hover:bg-blue-100 transition"
-                        >
-                          <span>Open Receipt (Drive / iCloud / Cloud Link)</span>
-                          <ExternalLink size={14} />
-                        </a>
-                      ) : (
-                        <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-700 select-all break-all">
-                          {exp.receiptUrl}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Receipt Voucher</span>
+                        <span className="text-[10px] text-slate-400 font-mono">0 MB stored</span>
+                      </div>
+                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
+                        <div className="flex items-center space-x-2 min-w-0">
+                          <FileText size={15} className="text-[#003580] shrink-0" />
+                          <span className="font-mono text-xs text-slate-800 truncate" title={exp.receiptUrl}>
+                            {exp.receiptUrl}
+                          </span>
                         </div>
-                      )}
+
+                        <div className="flex items-center space-x-2 pt-1 border-t border-slate-200/60">
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              const res = await receiptFileService.openReceiptReference(exp.receiptUrl);
+                              if (!res.success) {
+                                if (res.error === 'NO_DIRECTORY') {
+                                  setReceiptFeedback('Link your receipts folder in Expenses to view local files in 1 click.');
+                                } else if (res.error === 'FILE_NOT_FOUND') {
+                                  setReceiptFeedback(`File "${receiptFileService.extractFileName(exp.receiptUrl || '')}" not found in folder.`);
+                                } else {
+                                  setReceiptFeedback('Path copied to clipboard.');
+                                  await receiptFileService.copyReceiptPath(exp.receiptUrl || '');
+                                  setCopiedReceiptPath(true);
+                                  setTimeout(() => setCopiedReceiptPath(false), 2000);
+                                }
+                                setTimeout(() => setReceiptFeedback(null), 3500);
+                              }
+                            }}
+                            className="flex-1 py-1.5 px-3 bg-[#003580] hover:bg-[#002868] text-white text-xs font-semibold rounded-lg transition flex items-center justify-center space-x-1.5 min-h-[36px]"
+                          >
+                            {exp.receiptUrl.startsWith('http') ? <ExternalLink size={13} /> : <Eye size={13} />}
+                            <span>{exp.receiptUrl.startsWith('http') ? 'Open Link' : 'Open Receipt'}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              await receiptFileService.copyReceiptPath(exp.receiptUrl || '');
+                              setCopiedReceiptPath(true);
+                              setTimeout(() => setCopiedReceiptPath(false), 2000);
+                            }}
+                            className="py-1.5 px-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold rounded-lg transition flex items-center justify-center space-x-1.5 min-h-[36px]"
+                            title="Copy path or URL to clipboard"
+                          >
+                            {copiedReceiptPath ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                            <span>{copiedReceiptPath ? 'Copied!' : 'Copy Path'}</span>
+                          </button>
+                        </div>
+
+                        {receiptFeedback && (
+                          <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg text-[11px] text-[#003580] flex items-center space-x-1.5 animate-in fade-in">
+                            <Info size={13} className="shrink-0" />
+                            <span>{receiptFeedback}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 

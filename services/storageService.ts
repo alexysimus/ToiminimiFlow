@@ -1,8 +1,7 @@
 import { 
   Invoice, Expense, Customer, BusinessInfo, AuditLogEntry, 
-  MileageEntry, HomeOfficeDeduction, SalesSettlement, TaxSettings 
+  MileageEntry, HomeOfficeDeduction, SalesSettlement, TaxSettings, SyncMetadata 
 } from '../types';
-import { VERO_CONSTANTS } from './veroTaxEngine';
 
 const INVOICE_KEY = 'toiminimi_invoices';
 const EXPENSE_KEY = 'toiminimi_expenses';
@@ -13,9 +12,57 @@ const MILEAGE_KEY = 'toiminimi_mileage_entries';
 const HOME_OFFICE_KEY = 'toiminimi_home_office';
 const SETTLEMENTS_KEY = 'toiminimi_sales_settlements';
 const TAX_SETTINGS_KEY = 'toiminimi_tax_settings';
+const SYNC_META_KEY = 'toiminimi_sync_meta';
 
 export const storageService = {
-  // Audit Logs
+  // --- SYNC METADATA & 2026 LOCAL-FIRST CONFLICT MANAGEMENT ---
+  getSyncMetadata: (): SyncMetadata => {
+    const data = localStorage.getItem(SYNC_META_KEY);
+    if (data) {
+      try {
+        const parsed: SyncMetadata = JSON.parse(data);
+        return {
+          ...parsed,
+          schemaVersion: 2
+        };
+      } catch {}
+    }
+    const newMeta: SyncMetadata = {
+      deviceId: 'flow_' + Math.random().toString(36).substring(2, 10),
+      lastModifiedAt: new Date().toISOString(),
+      dirtyCount: 0,
+      schemaVersion: 2
+    };
+    localStorage.setItem(SYNC_META_KEY, JSON.stringify(newMeta));
+    return newMeta;
+  },
+
+  updateSyncMetadata: (partial: Partial<SyncMetadata>): SyncMetadata => {
+    const current = storageService.getSyncMetadata();
+    const updated: SyncMetadata = {
+      ...current,
+      ...partial,
+      lastModifiedAt: new Date().toISOString()
+    };
+    localStorage.setItem(SYNC_META_KEY, JSON.stringify(updated));
+    return updated;
+  },
+
+  incrementDirtyCount: (): void => {
+    const current = storageService.getSyncMetadata();
+    current.dirtyCount = (current.dirtyCount || 0) + 1;
+    current.lastModifiedAt = new Date().toISOString();
+    localStorage.setItem(SYNC_META_KEY, JSON.stringify(current));
+  },
+
+  recordBackupExported: (): void => {
+    const current = storageService.getSyncMetadata();
+    current.lastBackupAt = new Date().toISOString();
+    current.dirtyCount = 0;
+    localStorage.setItem(SYNC_META_KEY, JSON.stringify(current));
+  },
+
+  // --- AUDIT LOGS ---
   getAuditLogs: (entityId?: string): AuditLogEntry[] => {
     const data = localStorage.getItem(AUDIT_LOG_KEY);
     const logs: AuditLogEntry[] = data ? JSON.parse(data) : [];
@@ -39,112 +86,199 @@ export const storageService = {
     localStorage.setItem(AUDIT_LOG_KEY, JSON.stringify(logs));
   },
 
-  // Invoices
-  getInvoices: (): Invoice[] => {
+  // --- INVOICES (WITH SOFT-DELETE TOMBSTONE SUPPORT) ---
+  getRawInvoices: (): Invoice[] => {
     const data = localStorage.getItem(INVOICE_KEY);
     return data ? JSON.parse(data) : [];
   },
 
+  getInvoices: (): Invoice[] => {
+    return storageService.getRawInvoices().filter(inv => !inv.deletedAt);
+  },
+
   saveInvoice: (invoice: Invoice): void => {
-    const invoices = storageService.getInvoices();
-    const existingIndex = invoices.findIndex((i) => i.id === invoice.id);
+    const now = new Date().toISOString();
+    const raw = storageService.getRawInvoices();
+    const existingIndex = raw.findIndex((i) => i.id === invoice.id);
+    const updatedInvoice: Invoice = {
+      ...invoice,
+      createdAt: invoice.createdAt || now,
+      updatedAt: now,
+      version: (invoice.version || 0) + 1,
+      deletedAt: null
+    };
     
     if (existingIndex >= 0) {
-      invoices[existingIndex] = invoice;
+      raw[existingIndex] = updatedInvoice;
       storageService.addAuditLog(invoice.id, 'invoice', 'update', `Invoice #${invoice.invoiceNumber} updated`);
     } else {
-      invoices.push(invoice);
+      raw.push(updatedInvoice);
       storageService.addAuditLog(invoice.id, 'invoice', 'create', `Invoice #${invoice.invoiceNumber} created`);
     }
-    localStorage.setItem(INVOICE_KEY, JSON.stringify(invoices));
+    localStorage.setItem(INVOICE_KEY, JSON.stringify(raw));
+    storageService.incrementDirtyCount();
   },
 
   deleteInvoice: (id: string): void => {
-    const invoices = storageService.getInvoices();
-    const invoice = invoices.find(i => i.id === id);
+    const raw = storageService.getRawInvoices();
+    const invoice = raw.find(i => i.id === id);
     if (invoice) {
-        storageService.addAuditLog(id, 'invoice', 'delete', `Invoice #${invoice.invoiceNumber} deleted`);
+      const now = new Date().toISOString();
+      invoice.deletedAt = now;
+      invoice.updatedAt = now;
+      storageService.addAuditLog(id, 'invoice', 'delete', `Invoice #${invoice.invoiceNumber} deleted`);
+      localStorage.setItem(INVOICE_KEY, JSON.stringify(raw));
+      storageService.incrementDirtyCount();
     }
-    localStorage.setItem(INVOICE_KEY, JSON.stringify(invoices.filter(i => i.id !== id)));
   },
 
-  // Expenses
-  getExpenses: (): Expense[] => {
+  // --- EXPENSES (ZERO-BINARY / ZERO-BASE64 QUOTA PROTECTION) ---
+  getRawExpenses: (): Expense[] => {
     const data = localStorage.getItem(EXPENSE_KEY);
     return data ? JSON.parse(data) : [];
   },
 
+  getExpenses: (): Expense[] => {
+    return storageService.getRawExpenses().filter(exp => !exp.deletedAt);
+  },
+
   saveExpense: (expense: Expense): void => {
-    const expenses = storageService.getExpenses();
-    const existingIndex = expenses.findIndex((e) => e.id === expense.id);
+    const now = new Date().toISOString();
+    const raw = storageService.getRawExpenses();
+    const existingIndex = raw.findIndex((e) => e.id === expense.id);
     
+    // Sanitize receipt url: block base64 from polluting localStorage
+    let sanitizedReceipt = expense.receiptUrl;
+    if (sanitizedReceipt && (sanitizedReceipt.startsWith('data:image/') || sanitizedReceipt.startsWith('data:application/'))) {
+      sanitizedReceipt = 'receipt_voucher.pdf';
+    }
+
+    const updatedExpense: Expense = {
+      ...expense,
+      receiptUrl: sanitizedReceipt,
+      createdAt: expense.createdAt || now,
+      updatedAt: now,
+      version: (expense.version || 0) + 1,
+      deletedAt: null
+    };
+
     if (existingIndex >= 0) {
-      expenses[existingIndex] = expense;
+      raw[existingIndex] = updatedExpense;
       storageService.addAuditLog(expense.id, 'expense', 'update', `Expense updated (${expense.items.length} items)`);
     } else {
-      expenses.push(expense);
+      raw.push(updatedExpense);
       storageService.addAuditLog(expense.id, 'expense', 'create', `Expense created (${expense.items.length} items)`);
     }
-    localStorage.setItem(EXPENSE_KEY, JSON.stringify(expenses));
+    localStorage.setItem(EXPENSE_KEY, JSON.stringify(raw));
+    storageService.incrementDirtyCount();
   },
 
   deleteExpense: (id: string): void => {
-    storageService.addAuditLog(id, 'expense', 'delete', 'Expense deleted');
-    const expenses = storageService.getExpenses();
-    localStorage.setItem(EXPENSE_KEY, JSON.stringify(expenses.filter(e => e.id !== id)));
+    const raw = storageService.getRawExpenses();
+    const expense = raw.find(e => e.id === id);
+    if (expense) {
+      const now = new Date().toISOString();
+      expense.deletedAt = now;
+      expense.updatedAt = now;
+      storageService.addAuditLog(id, 'expense', 'delete', 'Expense deleted');
+      localStorage.setItem(EXPENSE_KEY, JSON.stringify(raw));
+      storageService.incrementDirtyCount();
+    }
   },
 
-  // Sales Settlements (Myyntilitykset: Stripe, iZettle, SumUp, Wolt, Cash)
-  getSalesSettlements: (): SalesSettlement[] => {
+  // --- SALES SETTLEMENTS (STRIPE / SUMUP / WOLT / CASH) ---
+  getRawSalesSettlements: (): SalesSettlement[] => {
     const data = localStorage.getItem(SETTLEMENTS_KEY);
     return data ? JSON.parse(data) : [];
   },
 
+  getSalesSettlements: (): SalesSettlement[] => {
+    return storageService.getRawSalesSettlements().filter(s => !s.deletedAt);
+  },
+
   saveSalesSettlement: (settlement: SalesSettlement): void => {
-    const settlements = storageService.getSalesSettlements();
-    const index = settlements.findIndex(s => s.id === settlement.id);
+    const now = new Date().toISOString();
+    const raw = storageService.getRawSalesSettlements();
+    const index = raw.findIndex(s => s.id === settlement.id);
+    const updated: SalesSettlement = {
+      ...settlement,
+      createdAt: settlement.createdAt || now,
+      updatedAt: now,
+      version: (settlement.version || 0) + 1,
+      deletedAt: null
+    };
+
     if (index >= 0) {
-      settlements[index] = settlement;
+      raw[index] = updated;
       storageService.addAuditLog(settlement.id, 'settlement', 'update', `Settlement ${settlement.provider} updated`);
     } else {
-      settlements.push(settlement);
+      raw.push(updated);
       storageService.addAuditLog(settlement.id, 'settlement', 'create', `Settlement ${settlement.provider} added (€${settlement.grossAmount})`);
     }
-    localStorage.setItem(SETTLEMENTS_KEY, JSON.stringify(settlements));
+    localStorage.setItem(SETTLEMENTS_KEY, JSON.stringify(raw));
+    storageService.incrementDirtyCount();
   },
 
   deleteSalesSettlement: (id: string): void => {
-    const settlements = storageService.getSalesSettlements();
-    storageService.addAuditLog(id, 'settlement', 'delete', 'Sales settlement deleted');
-    localStorage.setItem(SETTLEMENTS_KEY, JSON.stringify(settlements.filter(s => s.id !== id)));
+    const raw = storageService.getRawSalesSettlements();
+    const settlement = raw.find(s => s.id === id);
+    if (settlement) {
+      const now = new Date().toISOString();
+      settlement.deletedAt = now;
+      settlement.updatedAt = now;
+      storageService.addAuditLog(id, 'settlement', 'delete', 'Sales settlement deleted');
+      localStorage.setItem(SETTLEMENTS_KEY, JSON.stringify(raw));
+      storageService.incrementDirtyCount();
+    }
   },
 
-  // Mileage Entries (Ajopäiväkirja)
-  getMileageEntries: (): MileageEntry[] => {
+  // --- MILEAGE ENTRIES (AJOPÄIVÄKIRJA) ---
+  getRawMileageEntries: (): MileageEntry[] => {
     const data = localStorage.getItem(MILEAGE_KEY);
     return data ? JSON.parse(data) : [];
   },
 
+  getMileageEntries: (): MileageEntry[] => {
+    return storageService.getRawMileageEntries().filter(m => !m.deletedAt);
+  },
+
   saveMileageEntry: (entry: MileageEntry): void => {
-    const entries = storageService.getMileageEntries();
-    const index = entries.findIndex(e => e.id === entry.id);
+    const now = new Date().toISOString();
+    const raw = storageService.getRawMileageEntries();
+    const index = raw.findIndex(e => e.id === entry.id);
+    const updated: MileageEntry = {
+      ...entry,
+      createdAt: entry.createdAt || now,
+      updatedAt: now,
+      version: (entry.version || 0) + 1,
+      deletedAt: null
+    };
+
     if (index >= 0) {
-      entries[index] = entry;
+      raw[index] = updated;
       storageService.addAuditLog(entry.id, 'mileage', 'update', `Trip ${entry.route} updated (${entry.kilometers} km)`);
     } else {
-      entries.push(entry);
+      raw.push(updated);
       storageService.addAuditLog(entry.id, 'mileage', 'create', `Trip ${entry.route} added (${entry.kilometers} km)`);
     }
-    localStorage.setItem(MILEAGE_KEY, JSON.stringify(entries));
+    localStorage.setItem(MILEAGE_KEY, JSON.stringify(raw));
+    storageService.incrementDirtyCount();
   },
 
   deleteMileageEntry: (id: string): void => {
-    const entries = storageService.getMileageEntries();
-    storageService.addAuditLog(id, 'mileage', 'delete', 'Trip log entry deleted');
-    localStorage.setItem(MILEAGE_KEY, JSON.stringify(entries.filter(e => e.id !== id)));
+    const raw = storageService.getRawMileageEntries();
+    const entry = raw.find(e => e.id === id);
+    if (entry) {
+      const now = new Date().toISOString();
+      entry.deletedAt = now;
+      entry.updatedAt = now;
+      storageService.addAuditLog(id, 'mileage', 'delete', 'Trip log entry deleted');
+      localStorage.setItem(MILEAGE_KEY, JSON.stringify(raw));
+      storageService.incrementDirtyCount();
+    }
   },
 
-  // Home Office Deduction (Työhuonevähennys)
+  // --- HOME OFFICE DEDUCTION (TYÖHUONEVÄHENNYS) ---
   getHomeOfficeDeduction: (year: number = 2026): HomeOfficeDeduction => {
     const data = localStorage.getItem(HOME_OFFICE_KEY);
     if (data) {
@@ -162,12 +296,17 @@ export const storageService = {
   saveHomeOfficeDeduction: (deduction: HomeOfficeDeduction): void => {
     const data = localStorage.getItem(HOME_OFFICE_KEY);
     const parsed: Record<number, HomeOfficeDeduction> = data ? JSON.parse(data) : {};
-    parsed[deduction.year] = deduction;
+    const updated: HomeOfficeDeduction = {
+      ...deduction,
+      updatedAt: new Date().toISOString()
+    };
+    parsed[deduction.year] = updated;
     localStorage.setItem(HOME_OFFICE_KEY, JSON.stringify(parsed));
     storageService.addAuditLog(deduction.year.toString(), 'tax', 'update', `Home office deduction set to ${deduction.method}`);
+    storageService.incrementDirtyCount();
   },
 
-  // Tax Settings (Alv-kausi & Ennakkoveroprosentti)
+  // --- TAX SETTINGS (ALV-KAUSI & ENNAKKOVEROPROSENTTI) ---
   getTaxSettings: (): TaxSettings => {
     const data = localStorage.getItem(TAX_SETTINGS_KEY);
     if (data) {
@@ -179,7 +318,7 @@ export const storageService = {
     }
     return {
       vatPeriod: 'year', // Standard for small toiminimi under €30k
-      personalTaxRate: 13.0, // Default 13.0% as shown in OP screenshot
+      personalTaxRate: 13.0, // Default 13.0%
       prepaymentTaxAssessed: 0,
       financialYear: 2026,
       incomeMode: 'all_issued'
@@ -187,34 +326,59 @@ export const storageService = {
   },
 
   saveTaxSettings: (settings: TaxSettings): void => {
-    localStorage.setItem(TAX_SETTINGS_KEY, JSON.stringify(settings));
+    const updated: TaxSettings = {
+      ...settings,
+      updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem(TAX_SETTINGS_KEY, JSON.stringify(updated));
     storageService.addAuditLog('settings', 'tax', 'update', `Tax settings updated: rate ${settings.personalTaxRate}%, period ${settings.vatPeriod}`);
+    storageService.incrementDirtyCount();
   },
 
-  // Customers
-  getCustomers: (): Customer[] => {
+  // --- CUSTOMERS ---
+  getRawCustomers: (): Customer[] => {
     const data = localStorage.getItem(CUSTOMER_KEY);
     return data ? JSON.parse(data) : [];
   },
 
+  getCustomers: (): Customer[] => {
+    return storageService.getRawCustomers().filter(c => !c.deletedAt);
+  },
+
   saveCustomer: (customer: Customer): void => {
-    const customers = storageService.getCustomers();
-    const existingIndex = customers.findIndex((c) => c.id === customer.id);
+    const now = new Date().toISOString();
+    const raw = storageService.getRawCustomers();
+    const existingIndex = raw.findIndex((c) => c.id === customer.id);
+    const updated: Customer = {
+      ...customer,
+      createdAt: customer.createdAt || now,
+      updatedAt: now,
+      version: (customer.version || 0) + 1,
+      deletedAt: null
+    };
+
     if (existingIndex >= 0) {
-      customers[existingIndex] = customer;
+      raw[existingIndex] = updated;
     } else {
-      customers.push(customer);
+      raw.push(updated);
     }
-    localStorage.setItem(CUSTOMER_KEY, JSON.stringify(customers));
+    localStorage.setItem(CUSTOMER_KEY, JSON.stringify(raw));
+    storageService.incrementDirtyCount();
   },
 
   deleteCustomer: (id: string): void => {
-    const customers = storageService.getCustomers();
-    const newCustomers = customers.filter(c => c.id !== id);
-    localStorage.setItem(CUSTOMER_KEY, JSON.stringify(newCustomers));
+    const raw = storageService.getRawCustomers();
+    const customer = raw.find(c => c.id === id);
+    if (customer) {
+      const now = new Date().toISOString();
+      customer.deletedAt = now;
+      customer.updatedAt = now;
+      localStorage.setItem(CUSTOMER_KEY, JSON.stringify(raw));
+      storageService.incrementDirtyCount();
+    }
   },
 
-  // Business Info
+  // --- BUSINESS INFO ---
   getBusinessInfo: (): BusinessInfo => {
     const data = localStorage.getItem(BUSINESS_INFO_KEY);
     if (!data) return {
@@ -231,12 +395,22 @@ export const storageService = {
   },
 
   saveBusinessInfo: (info: BusinessInfo): void => {
-    localStorage.setItem(BUSINESS_INFO_KEY, JSON.stringify(info));
+    const updated: BusinessInfo = {
+      ...info,
+      updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem(BUSINESS_INFO_KEY, JSON.stringify(updated));
+    storageService.incrementDirtyCount();
   },
 
-  // Complete Backup & Restore Engine
+  // --- COMPLETE SYNC-READY BACKUP & RESTORE ENGINE ---
   exportAllData: (): string => {
+    const syncMeta = storageService.getSyncMetadata();
     const data = {
+      schemaVersion: 2,
+      appVersion: '2.0-vero-2026',
+      deviceId: syncMeta.deviceId,
+      exportedAt: new Date().toISOString(),
       invoices: storageService.getInvoices(),
       expenses: storageService.getExpenses(),
       salesSettlements: storageService.getSalesSettlements(),
@@ -245,10 +419,9 @@ export const storageService = {
       taxSettings: storageService.getTaxSettings(),
       customers: storageService.getCustomers(),
       businessInfo: storageService.getBusinessInfo(),
-      auditLogs: storageService.getAuditLogs(),
-      appVersion: '2.0-vero-2026',
-      exportedAt: new Date().toISOString()
+      auditLogs: storageService.getAuditLogs()
     };
+    storageService.recordBackupExported();
     return JSON.stringify(data, null, 2);
   },
 
@@ -256,8 +429,17 @@ export const storageService = {
     try {
       const data = JSON.parse(jsonString);
       if (!data.invoices && !data.expenses && !data.customers && !data.businessInfo && !data.salesSettlements) {
-        throw new Error("Invalid backup file");
+        throw new Error("Invalid backup file: Missing core bookkeeping entities.");
       }
+
+      // Sanitize legacy base64 in expenses if importing an older backup
+      if (Array.isArray(data.expenses)) {
+        data.expenses = data.expenses.map((e: Expense) => ({
+          ...e,
+          receiptUrl: e.receiptUrl?.startsWith('data:') ? 'legacy_receipt.pdf' : e.receiptUrl
+        }));
+      }
+
       if (data.invoices) localStorage.setItem(INVOICE_KEY, JSON.stringify(data.invoices));
       if (data.expenses) localStorage.setItem(EXPENSE_KEY, JSON.stringify(data.expenses));
       if (data.salesSettlements) localStorage.setItem(SETTLEMENTS_KEY, JSON.stringify(data.salesSettlements));
@@ -270,11 +452,39 @@ export const storageService = {
       if (data.customers) localStorage.setItem(CUSTOMER_KEY, JSON.stringify(data.customers));
       if (data.businessInfo) localStorage.setItem(BUSINESS_INFO_KEY, JSON.stringify(data.businessInfo));
       if (data.auditLogs) localStorage.setItem(AUDIT_LOG_KEY, JSON.stringify(data.auditLogs));
+
+      storageService.updateSyncMetadata({
+        lastModifiedAt: new Date().toISOString(),
+        dirtyCount: 0
+      });
+      storageService.addAuditLog('backup', 'tax', 'create', 'Data restored from JSON backup archive');
       return true;
     } catch (e) {
       console.error("Import failed:", e);
       return false;
     }
+  },
+
+  // --- TOMBSTONE PURGE (FOR RECLAIMING LOCAL STORAGE IF NEEDED) ---
+  purgeTombstones: (): number => {
+    let purgedCount = 0;
+    const filterAndSave = (key: string) => {
+      const data = localStorage.getItem(key);
+      if (data) {
+        const items = JSON.parse(data);
+        if (Array.isArray(items)) {
+          const active = items.filter((i: any) => !i.deletedAt);
+          purgedCount += items.length - active.length;
+          localStorage.setItem(key, JSON.stringify(active));
+        }
+      }
+    };
+    filterAndSave(INVOICE_KEY);
+    filterAndSave(EXPENSE_KEY);
+    filterAndSave(SETTLEMENTS_KEY);
+    filterAndSave(MILEAGE_KEY);
+    filterAndSave(CUSTOMER_KEY);
+    return purgedCount;
   },
 
   calculateFinnishReference: (base: string): string => {
@@ -291,14 +501,19 @@ export const storageService = {
     return base + checksum;
   },
 
-  generateId: (): string => Math.random().toString(36).substr(2, 9),
+  generateId: (): string => {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+    return 'flow_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 9);
+  },
   
   getNextInvoiceNumber: (): string => {
-      const invoices = storageService.getInvoices();
-      const maxNum = invoices.reduce((max, inv) => {
-          const num = parseInt(inv.invoiceNumber);
-          return isNaN(num) ? max : Math.max(max, num);
-      }, 999);
-      return (maxNum + 1).toString();
+    const invoices = storageService.getInvoices();
+    const maxNum = invoices.reduce((max, inv) => {
+      const num = parseInt(inv.invoiceNumber);
+      return isNaN(num) ? max : Math.max(max, num);
+    }, 999);
+    return (maxNum + 1).toString();
   }
 };

@@ -1,12 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Trash2, Save, Upload, Sparkles, Check, Edit3, ArrowLeft, CheckCircle2, Link2, ExternalLink } from 'lucide-react';
+import { 
+  Plus, Trash2, Save, Upload, Sparkles, Check, Edit3, ArrowLeft, 
+  CheckCircle2, Link2, ExternalLink, Folder, FolderOpen, Copy, Eye, FileText, AlertCircle 
+} from 'lucide-react';
 import { Expense, ExpenseItem, ExpenseCategory } from '../types';
 import { storageService } from '../services/storageService';
+import { receiptFileService } from '../services/receiptFileService';
 import { formatFinnishCurrency } from '../services/formatUtils';
 
 const ExpenseForm: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [linkedDir, setLinkedDir] = useState<string | null>(null);
+  const [receiptFeedback, setReceiptFeedback] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
   const [expense, setExpense] = useState<Expense>(() => {
     const editId = localStorage.getItem('flow_edit_expense_id');
@@ -43,6 +50,7 @@ const ExpenseForm: React.FC = () => {
   useEffect(() => {
     localStorage.removeItem('flow_edit_expense_id');
     localStorage.removeItem('flow_copy_expense_id');
+    receiptFileService.getReceiptDirectoryName().then(setLinkedDir);
     if (expense.items.length === 0 && !isEditingMode) {
       addRow();
     }
@@ -55,6 +63,46 @@ const ExpenseForm: React.FC = () => {
     if (!file) return;
     // Store only the filename/reference - keeping localStorage lightweight and privacy-first
     setExpense(prev => ({ ...prev, receiptUrl: file.name }));
+  };
+
+  const handleConnectDirectory = async () => {
+    const res = await receiptFileService.linkReceiptDirectory();
+    if (res.success && res.dirName) {
+      setLinkedDir(res.dirName);
+      setReceiptFeedback(`Connected folder: "${res.dirName}"`);
+      setTimeout(() => setReceiptFeedback(null), 3500);
+    } else if (res.error && res.error !== 'USER_CANCELLED') {
+      if (res.error === 'NOT_SUPPORTED') {
+        alert('Your browser does not support folder access. You can still paste file paths and use "Copy Path".');
+      } else {
+        alert('Could not connect folder: ' + res.error);
+      }
+    }
+  };
+
+  const handleOpenReceipt = async () => {
+    if (!expense.receiptUrl) return;
+    const res = await receiptFileService.openReceiptReference(expense.receiptUrl);
+    if (!res.success) {
+      if (res.error === 'NO_DIRECTORY') {
+        setReceiptFeedback('Link your receipts folder above to view local files in 1 click.');
+      } else if (res.error === 'FILE_NOT_FOUND') {
+        setReceiptFeedback(`File "${receiptFileService.extractFileName(expense.receiptUrl)}" not found in folder "${linkedDir}".`);
+      } else {
+        setReceiptFeedback('Could not open file directly. Copying path to clipboard.');
+        await receiptFileService.copyReceiptPath(expense.receiptUrl);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      }
+      setTimeout(() => setReceiptFeedback(null), 4000);
+    }
+  };
+
+  const handleCopyPath = async () => {
+    if (!expense.receiptUrl) return;
+    await receiptFileService.copyReceiptPath(expense.receiptUrl);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   const addRow = () => {
@@ -128,15 +176,36 @@ const ExpenseForm: React.FC = () => {
         {/* Receipt Upload & Date Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Smart Receipt Section: Link/Path or File Upload */}
-          <div className="p-5 bg-white border border-slate-200/80 rounded-2xl shadow-xs space-y-3 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
+          <div className="p-5 bg-white border border-slate-200/80 rounded-2xl shadow-xs space-y-3.5 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-1 mb-1">
                 <label className="block text-xs font-semibold text-slate-700">
-                  Receipt Voucher (Link, Path, or File)
+                  Receipt Voucher (Kuitti / Tositelinkki)
                 </label>
-                <span className="text-[10px] font-semibold text-[#003580] bg-[#EDF4FC] px-2 py-0.5 rounded-full">
-                  Guest Friendly
-                </span>
+                
+                {/* Linked Folder Indicator / Connector */}
+                {linkedDir ? (
+                  <button
+                    type="button"
+                    onClick={handleConnectDirectory}
+                    className="inline-flex items-center space-x-1.5 px-2.5 py-1 text-[11px] font-semibold text-[#003580] bg-[#EDF4FC] hover:bg-blue-100/80 border border-[#BFDBFE] rounded-lg transition"
+                    title="Change connected receipt folder"
+                  >
+                    <FolderOpen size={13} className="text-[#003580]" />
+                    <span className="truncate max-w-[120px]">Folder: {linkedDir}</span>
+                    <span className="text-[10px] text-slate-400">Change</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleConnectDirectory}
+                    className="inline-flex items-center space-x-1 px-2.5 py-1 text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
+                    title="Connect your local receipts folder (e.g. E:\Toiminimi\Kuitit) to open files in 1 click"
+                  >
+                    <Folder size={13} />
+                    <span>Connect Folder</span>
+                  </button>
+                )}
               </div>
               
               <div className="flex items-center space-x-2">
@@ -146,18 +215,18 @@ const ExpenseForm: React.FC = () => {
                     type="text"
                     value={expense.receiptUrl || ''}
                     onChange={(e) => setExpense({ ...expense, receiptUrl: e.target.value })}
-                    placeholder="https://drive.google.com/... or /path/to/receipt.pdf"
+                    placeholder="e.g. 2026-11_telia.pdf or https://drive.google.com/..."
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base sm:text-xs pl-8 pr-3 py-2.5 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580] min-h-[44px]"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold flex items-center space-x-1.5 shrink-0 transition min-h-[44px]"
-                  title="Upload receipt image or PDF from device"
+                  className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-700 rounded-xl text-xs sm:text-sm font-semibold flex items-center space-x-1.5 shrink-0 transition min-h-[44px]"
+                  title="Choose receipt file from device (saves name only, 0 bytes uploaded)"
                 >
                   <Upload size={16} />
-                  <span className="hidden sm:inline">Upload</span>
+                  <span className="hidden sm:inline">Select File</span>
                 </button>
               </div>
 
@@ -170,28 +239,50 @@ const ExpenseForm: React.FC = () => {
               />
             </div>
 
+            {/* Quick Action & Feedback Strip */}
             {expense.receiptUrl && (
-              <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-800">
-                <div className="flex items-center space-x-2 min-w-0">
-                  <Check size={14} className="text-emerald-600 shrink-0" />
-                  <span className="font-semibold truncate">Receipt voucher: {expense.receiptUrl}</span>
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                <div className="flex items-center justify-between gap-2 min-w-0 text-xs">
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <FileText size={15} className="text-[#003580] shrink-0" />
+                    <span className="font-mono font-semibold text-slate-800 truncate" title={expense.receiptUrl}>
+                      {expense.receiptUrl}
+                    </span>
+                  </div>
                 </div>
-                {expense.receiptUrl.startsWith('http') && (
-                  <a
-                    href={expense.receiptUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#003580] hover:underline flex items-center space-x-1 shrink-0 font-semibold ml-2"
+
+                <div className="flex items-center space-x-2 pt-1 border-t border-slate-200/60">
+                  <button
+                    type="button"
+                    onClick={handleOpenReceipt}
+                    className="flex-1 py-1.5 px-3 bg-[#003580] hover:bg-[#002868] text-white text-xs font-semibold rounded-lg transition flex items-center justify-center space-x-1.5 min-h-[36px]"
                   >
-                    <span>Open link</span>
-                    <ExternalLink size={12} />
-                  </a>
-                )}
+                    {expense.receiptUrl.startsWith('http') ? <ExternalLink size={13} /> : <Eye size={13} />}
+                    <span>{expense.receiptUrl.startsWith('http') ? 'Open Cloud Link' : 'Open Receipt'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCopyPath}
+                    className="py-1.5 px-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold rounded-lg transition flex items-center justify-center space-x-1.5 min-h-[36px]"
+                    title="Copy full path or filename to clipboard"
+                  >
+                    {isCopied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                    <span>{isCopied ? 'Copied!' : 'Copy Path'}</span>
+                  </button>
+                </div>
               </div>
             )}
 
-            <p className="text-xs text-slate-500 leading-relaxed">
-              💡 <strong>Storage Tip:</strong> Pasting a link to Google Drive, iCloud, or a local file path keeps your browser storage lightweight and permanent with zero quota limits.
+            {receiptFeedback && (
+              <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-[#003580] flex items-center space-x-2 animate-in fade-in">
+                <AlertCircle size={14} className="shrink-0" />
+                <span>{receiptFeedback}</span>
+              </div>
+            )}
+
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              💡 <strong>Zero-Storage Privacy:</strong> Toiminimi Flow never uploads or stores binary images in your browser. Files remain in your local folder or private cloud (Google Drive/iCloud).
             </p>
           </div>
 

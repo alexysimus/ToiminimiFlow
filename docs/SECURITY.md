@@ -107,3 +107,31 @@ To maintain 100% legal compliance **without subjecting sole traders to disruptiv
 - **Graceful Open-Source Fallback**:
   - In Toiminimi Flow, telemetry is 100% disabled if `VITE_GA_MEASUREMENT_ID` is empty. Anyone self-hosting or cloning the application runs a completely untracked, offline instance by default.
 
+---
+
+## 7. Zero-Binary Storage & Receipt File Handling Security
+
+Handling financial receipts and invoices entails stringent data privacy, quota constraints, and browser sandboxing safeguards:
+
+### 1. Storage Quota Protection (Zero Binary Storage)
+- Browser `localStorage` is subject to a strict hard limit (~5MB across the entire origin).
+- Storing Base64-encoded PDF documents or high-resolution camera photos causes rapid quota exhaustion (`QuotaExceededError`) and risks corrupted write operations.
+- Toiminimi Flow enforces a **Zero-Binary Storage invariant**:
+  - No binary blobs or Base64 image payloads are allowed in `localStorage`.
+  - When a user attaches a receipt file, only its `name` and local/cloud reference paths are recorded.
+  - The storage service and sanitizers actively reject and strip Base64 strings (`data:image/...`).
+
+### 2. Browser Sandboxing & File System Access API
+- For local folder receipts, the app uses the modern W3C **File System Access API** (`window.showDirectoryPicker()`):
+  - **Explicit User Consent**: The browser prompts the user explicitly before granting access to a designated folder.
+  - **Scoped Directory Access**: The application cannot browse arbitrary system partitions or access directories beyond the user-selected folder handle.
+  - **Secure Handle Persistence**: The `FileSystemDirectoryHandle` is stored securely within the browser's origin-isolated IndexedDB (`toiminimi_fs_db`), completely inaccessible to external origins or scripts.
+  - **Memory-Safe Object URLs**: Temporary viewing utilizes `URL.createObjectURL(file)` held only in transient client memory, which is automatically revoked upon window closure.
+
+### 3. URL Protocol Sanitization & XSS Defense
+- URLs entered for cloud receipts (Google Drive, iCloud, Dropbox, OneDrive) undergo strict protocol validation via `new URL()`:
+  - Only `http:` and `https:` protocols are accepted for outbound navigation (`rel="noopener noreferrer"`).
+  - Dangerous protocols (`javascript:`, `vbscript:`, `file:`) are blocked to prevent cross-site scripting (XSS) or local security zone bypasses.
+  - For local file paths, rather than attempting unsafe `file:///` hyperlinking (which is blocked by modern browser security models), the application provides a 1-click clipboard copy utility to let users locate the file via their operating system's native File Explorer or Finder.
+
+

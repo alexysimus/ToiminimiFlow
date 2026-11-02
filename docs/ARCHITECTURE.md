@@ -97,24 +97,46 @@ graph TD
 
 ## 3. Data Models (`types.ts`)
 
+### Metadata & Sync Primitives
+- **`SyncMetadata`**:
+  - `schemaVersion`: Numeric data schema version (`2`).
+  - `deviceId`: Cryptographically strong UUIDv4 identifier (`crypto.randomUUID()`).
+  - `lastModified`: ISO 8601 timestamp of latest local modification.
+  - `dirtyCount`: Integer counter of unbacked/unsynced mutations.
+  - `lastBackupAt`: ISO 8601 timestamp of last exported JSON backup.
+- **`BaseSyncEntity`** (applied across all core entities):
+  - `id`: Unique identifier (UUIDv4).
+  - `createdAt`: ISO 8601 creation timestamp.
+  - `updatedAt`: ISO 8601 modification timestamp.
+  - `deletedAt`: Optional ISO 8601 timestamp for soft-deletion / tombstones (enables conflict-free eventual sync).
+  - `version`: Monotonic revision number for conflict resolution.
+
 ### Primary Entities
 1. **`Invoice`**:
    - `id`, `invoiceNumber`, `invoiceDate`, `dueDate`, `paymentDuration`, `referenceNumber` (Finnish viitenumero).
    - Sender & recipient contact details, IBAN, BIC.
    - `items: InvoiceItem[]` (`quantity`, `unitPrice` VAT-inclusive, `vatRate`).
+   - `status`: `'draft' | 'sent' | 'paid' | 'overdue'`.
+   - `notes`, `updatedAt`, `deletedAt`, `version`.
 2. **`Expense`**:
-   - `id`, `paymentDate`, `receiptUrl` (HTTP URL, cloud link, or file path).
+   - `id`, `paymentDate`, `notes`, `updatedAt`, `deletedAt`, `version`.
+   - `receiptUrl` (Sanitized HTTP/HTTPS URL, cloud sharing link, or local path).
+   - `receiptFileName` (Original receipt file name for 0-storage local folder matching).
    - `items: ExpenseItem[]` (`description`, `amount` gross, `vatRate`, `category: ExpenseCategory`).
 3. **`SalesSettlement`**:
    - Provider (`iZettle`, `SumUp`, `Stripe`, `Wolt`, `Foodora`, `Cash`, `Other`).
    - `grossAmount`, `feeAmount` (deductible business operating expense), `netAmount`.
+   - `date`, `description`, `reference`, `updatedAt`, `deletedAt`.
 4. **`MileageEntry`**:
    - `date`, `route`, `kilometers`, `purpose`, `passengers`, `ratePerKm` (€0.55 standard 2026).
+   - `deductionAmount`, `updatedAt`, `deletedAt`.
 5. **`HomeOfficeDeduction`**:
    - `method` (`tier_1` €980, `tier_2` €490, `tier_3` €245, or `actual`).
+   - `year`, `actualExpensesAmount`, `calculatedDeduction`, `updatedAt`, `deletedAt`.
 6. **`TaxSettings`**:
    - `vatPeriod` (`year`, `quarter`, `month`, `exempt`).
    - `personalTaxRate` (e.g. 13.0%), `prepaymentTaxAssessed` (annual ennakkovero decision).
+   - `updatedAt`, `deletedAt`.
 
 ---
 
@@ -194,4 +216,56 @@ flowchart LR
 - Telemetry wrapper loaded conditionally only when `VITE_GA_MEASUREMENT_ID` is present.
 - Configured with Google Consent Mode v2 (`analytics_storage: 'denied'`, `ad_storage: 'denied'`).
 - Sends stateless, aggregate technical pings without writing cookies or tracking identifiers across sessions, exempting the application from mandatory EU cookie consent modals.
+
+---
+
+## 7. Sync-Ready Storage & Zero-Storage Receipt Architecture
+
+To prepare the application for eventual multi-device cloud synchronization (Google Drive `appDataFolder` / iCloud) without introducing breaking schema migrations or bloat, storage services operate under the following engineering specifications:
+
+```
+┌───────────────────────────────────────────────────────────────────────────────────────┐
+│                    ZERO-STORAGE RECEIPT REFERENCE ARCHITECTURE                        │
+└───────────────────────────────────────────────────────────────────────────────────────┘
+                                   User Attaches Receipt
+                                             │
+                       ┌─────────────────────┴─────────────────────┐
+                       ▼                                           ▼
+            Local Receipt File (.pdf/.jpg)               Cloud / Web URL Link
+                       │                                           │
+         Extract File Name & Local Path               Validate Protocol (http/https)
+         (0 bytes stored in localStorage)             (0 binary data stored)
+                       │                                           │
+                       ├─────────────────────┬─────────────────────┤
+                       ▼                                           ▼
+             Chromium Browsers                           Other Platforms
+     (File System Access API Directory)            (Clipboard OS Lookup Fallback)
+                       │                                           │
+         IndexedDB: toiminimi_fs_db                   1-Click Copy Exact Path
+         Direct 1-Click File Open via                 to Clipboard for File Explorer
+         Ephemeral URL.createObjectURL                / macOS Spotlight Search
+```
+
+### 1. Zero-Binary Storage Policy
+- **The Problem**: Web applications that encode image/PDF attachments as Base64 strings immediately saturate the browser's ~5MB `localStorage` limit after 10–20 receipt scans, causing fatal `QuotaExceededError` crashes.
+- **The Solution**: Toiminimi Flow stores **strictly 0 bytes** of binary image data in `localStorage`.
+- Only reference metadata is recorded:
+  - `receiptUrl`: Cloud link (Google Drive, iCloud, Dropbox, OneDrive) or relative/absolute local file path (`C:/Kuitit/2026/01.pdf` or `receipts/alv_2026.pdf`).
+  - `receiptFileName`: Clean original file name (`kuitti_04112026.pdf`) used for smart local folder lookup.
+- Strict input sanitization in `services/receiptFileService.ts` rejects any Base64 strings (`data:image/...`), stripping unauthorized payloads automatically.
+
+### 2. High-Performance Local Folder Integration
+- Supported Chromium browsers (Chrome, Edge, Opera, Brave) leverage the **File System Access API** (`window.showDirectoryPicker()`):
+  1. The user connects their local receipts folder once (e.g. `C:\Users\...\Documents\Kuitit` or iCloud synced folder).
+  2. The secure `FileSystemDirectoryHandle` is stored in IndexedDB (`toiminimi_fs_db`).
+  3. Clicking **"Open Receipt"** resolves the file directly within the connected folder handle, generates an ephemeral `URL.createObjectURL(file)` in memory, and opens the PDF or image in a dedicated browser tab.
+  4. Ephemeral URLs are automatically revoked when the window unloads, preventing memory leakage.
+- For browsers without File System Access API support (Firefox, Safari iOS), the app provides a **1-click "Copy Path"** action with clear toast feedback, allowing instant lookup via OS File Explorer / Finder / Spotlight.
+
+### 3. Sync-Ready Metadata & Tombstones (Schema v2)
+- **Cryptographic UUIDv4 Identifiers**: All entities use `crypto.randomUUID()` guaranteeing globally unique keys across distributed devices.
+- **Soft Deletion & Tombstones**: Record deletions set a `deletedAt: string` ISO timestamp rather than immediately deleting records from storage. This guarantees that when cloud sync is connected, a deletion on Device A correctly propagates to Device B instead of being resurrected as a "new" record.
+- **Dirty Tracking**: `dirtyCount` increments on every create, update, or soft-delete, tracking unsynced mutations and warning users in the Data Backup view when unexported ledger changes exist.
+- **Purge Utility**: `storageService.purgeTombstones()` provides an on-demand maintenance action in Data Backup to permanently clean up deleted records when desired.
+
 

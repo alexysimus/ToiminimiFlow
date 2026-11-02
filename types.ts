@@ -67,6 +67,9 @@ export interface Invoice {
   message: string;
   items: InvoiceItem[];
   createdAt: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+  version?: number;
 }
 
 export interface ExpenseItem {
@@ -81,9 +84,13 @@ export interface ExpenseItem {
 export interface Expense {
   id: string;
   receiptUrl?: string;
+  receiptFileName?: string;
   paymentDate: string;
   items: ExpenseItem[];
   createdAt: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+  version?: number;
 }
 
 export interface Customer {
@@ -92,6 +99,10 @@ export interface Customer {
   businessId: string;
   email: string;
   address: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+  version?: number;
 }
 
 export interface BusinessInfo {
@@ -101,6 +112,7 @@ export interface BusinessInfo {
   email: string;
   phone: string;
   bankAccounts: BankAccount[];
+  updatedAt?: string;
 }
 
 export interface TaxSettings {
@@ -109,6 +121,7 @@ export interface TaxSettings {
   prepaymentTaxAssessed: number; // Annual ennakkovero from Vero decision (eur)
   financialYear: number; // e.g. 2026
   incomeMode?: IncomeCalculationMode; // 'all_issued' (accrual) or 'paid_only' (cash-basis)
+  updatedAt?: string;
 }
 
 export interface MileageEntry {
@@ -120,6 +133,9 @@ export interface MileageEntry {
   passengers: number;
   ratePerKm: number; // 0.55 for 2026, 0.59 for 2025
   createdAt: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+  version?: number;
 }
 
 export interface HomeOfficeDeduction {
@@ -127,6 +143,7 @@ export interface HomeOfficeDeduction {
   method: 'tier_1' | 'tier_2' | 'tier_3' | 'actual'; // €980 / €490 / €245 / custom
   actualAmount?: number;
   notes?: string;
+  updatedAt?: string;
 }
 
 export interface SalesSettlement {
@@ -139,6 +156,18 @@ export interface SalesSettlement {
   vatRate: number; // 25.5, 14, 10, 0
   description: string;
   createdAt: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+  version?: number;
+}
+
+export interface SyncMetadata {
+  deviceId: string;
+  lastModifiedAt: string;
+  lastBackupAt?: string;
+  dirtyCount: number;
+  schemaVersion: number;
+  receiptDirectoryName?: string;
 }
 
 export type IncomeCalculationMode = 'paid_only' | 'all_issued';
